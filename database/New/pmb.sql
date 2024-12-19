@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 16 Des 2024 pada 05.28
+-- Waktu pembuatan: 19 Des 2024 pada 08.22
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -40,8 +40,8 @@ CREATE TABLE `berkas` (
 --
 
 INSERT INTO `berkas` (`berkas_id`, `mahasiswa_id`, `jenis_berkas`, `file_path`, `upload_time`) VALUES
-(16, 32, 'PDF', '../../uploads/file_675f99d3e3f382.00477094.pdf', '2024-12-16 03:09:07'),
-(17, 33, 'PDF', '../../uploads/file_675fa96224c6a5.08908803.pdf', '2024-12-16 04:15:30');
+(23, 46, 'PDF', '../../uploads/file_6763ad8ddc5641.71234788.pdf', '2024-12-19 05:22:21'),
+(24, 47, 'PDF', '../../uploads/file_6763c158ea3024.79137638.pdf', '2024-12-19 06:46:48');
 
 -- --------------------------------------------------------
 
@@ -90,8 +90,8 @@ CREATE TABLE `mahasiswa` (
 --
 
 INSERT INTO `mahasiswa` (`mahasiswa_id`, `user_id`, `nama_lengkap`, `nik`, `alamat`, `sekolah_asal`, `tahun_lulus`, `biaya_pendaftaran`, `no_telp`, `program_studi_id`, `kelas_id`, `Nilai_ujian`, `waktu_pendaftaran`) VALUES
-(32, 23, 'FARHAN KEBAB', '3939393', 'WMMWMW', 'SMK BINA NUSA MANDIRI', '2016', 1500000, '939393010', 2, 2, 0, '2024-12-16 03:09:07'),
-(33, 23, 'biji kuda', '29292220', 'wkwkwkw', 'SMK BINA NUSA MANDIRI', '2015', 1500000, '2929292', 1, 1, 0, '2024-12-16 04:15:30');
+(46, 24, 'STEVEN', '5858585844444444', 'WKWKWKW', 'SMK BINA NUSA MANDIRI', '2016', 1500000, '959595', 6, 2, 0, '2024-12-19 05:22:21'),
+(47, 21, 'ADMIN', '3393939', 'KWWKWK', 'SMK BINA NUSA MANDIRI', '2011', 1500000, '959595', 6, 1, 0, '2024-12-19 06:46:48');
 
 -- --------------------------------------------------------
 
@@ -104,6 +104,14 @@ CREATE TABLE `pendaftaran` (
   `mahasiswa_id` int(11) NOT NULL,
   `status` enum('menunggu disetujui','disetujui') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `pendaftaran`
+--
+
+INSERT INTO `pendaftaran` (`pendaftaran_id`, `mahasiswa_id`, `status`) VALUES
+(2, 46, 'menunggu disetujui'),
+(4, 47, 'menunggu disetujui');
 
 -- --------------------------------------------------------
 
@@ -179,8 +187,9 @@ INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `create
 (21, 'Admin', 'admin@example.com', '$2y$10$q57nz3Tck8hSAPn.LQuQ7usJQMLlcyOzc4teDPOyH2ESGYMW4hV/C', 'admin', '2024-12-14 12:46:02', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQxODAzNjIsImV4cCI6MTczNDE4MDY2MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSJ9.EGDtxwAp-Z-B1Zlpbp3TWbrXwS8EqwEKZx2FR8ifuIQ'),
 (22, 'Argi', 'argi@mail.com', '$2y$10$GvllMUKYoy6p3tPlj.VFa.Uc8mTtTeaDtXaPJ9QPb.PuU1NxKpxwG', 'pendaftar', '2024-12-14 15:37:48', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQxOTA2NjgsImV4cCI6MTczNDE5MDk2OCwiZW1haWwiOiJhcmdpQG1haWwuY29tIn0.84wwwQ_gzEgCtQXlMVnPn9NjZLAcj5yButOKl0bqKZI'),
 (23, 'Stevanus Andika Galih Setiawan', 'stevcomp58@gmail.com', '$2y$10$K1j6v3NQ1onhvSez88Vbn.9n3nubHXvEy/VXxoqO1YDRfxaY0X6sK', 'pendaftar', '2024-12-14 16:23:29', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQxOTM0MDksImV4cCI6MTczNDE5MzcwOSwiZW1haWwiOiJzdGV2Y29tcDU4QGdtYWlsLmNvbSJ9.OULtUeFADKRvI8jyza3KR7EhF2mThJHvy-LvqkZmbDY'),
-(24, 'User', 'user@example.com', '$2y$10$oBJllzrIxVfUsQpMP48z0ewRW5AsaENSD4ydKSDcFSLkXINRxfJ7O', 'pendaftar', '2024-12-14 17:25:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQxOTcxMTcsImV4cCI6MTczNDE5NzQxNywiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.ssh9HBMaJc9xqtWvu0nthw9jNdvRPHeKrAqBFs7fG2g'),
-(25, 'Dhaffa', 'Daf@mail.com', '$2y$10$NSKu.ahtR6wY1Jxw.j8ttujahNe9zWILtf9L/BngqdksqYsEfkwXC', 'pendaftar', '2024-12-14 17:50:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQxOTg2NTQsImV4cCI6MTczNDE5ODk1NCwiZW1haWwiOiJEYWZAbWFpbC5jb20ifQ.VwVMGfRA1AMXsq5GXGMI86GuL8g43HtQhhG2fVB2JmE');
+(24, 'User', 'user@example.com', '$2y$10$8Nk3YcYXw.ZDmVOMnnnbguhQYlOo0lT.IF0KKeCqZaqUskYDTWRVi', 'pendaftar', '2024-12-14 17:25:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQxOTcxMTcsImV4cCI6MTczNDE5NzQxNywiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.ssh9HBMaJc9xqtWvu0nthw9jNdvRPHeKrAqBFs7fG2g'),
+(25, 'Dhaffa', 'Daf@mail.com', '$2y$10$NSKu.ahtR6wY1Jxw.j8ttujahNe9zWILtf9L/BngqdksqYsEfkwXC', 'pendaftar', '2024-12-14 17:50:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQxOTg2NTQsImV4cCI6MTczNDE5ODk1NCwiZW1haWwiOiJEYWZAbWFpbC5jb20ifQ.VwVMGfRA1AMXsq5GXGMI86GuL8g43HtQhhG2fVB2JmE'),
+(26, 'coba', 'admin1@example.com', '$2y$10$.hpsw29KeZoXvRYCr/Ewq.9Pe4wNWZjvTFkXf5254SEItOV.7l.Gq', 'admin', '2024-12-19 07:01:59', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQ1OTE3MTksImV4cCI6MTczNDU5MjAxOSwiZW1haWwiOiJhZG1pbjFAZXhhbXBsZS5jb20ifQ.F6d_bkphnB4JT31W6KAYfaT5_B9aSOB3NCKF_GN8D0w');
 
 --
 -- Indexes for dumped tables
@@ -243,7 +252,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `berkas`
 --
 ALTER TABLE `berkas`
-  MODIFY `berkas_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `berkas_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT untuk tabel `kelas`
@@ -255,13 +264,13 @@ ALTER TABLE `kelas`
 -- AUTO_INCREMENT untuk tabel `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `mahasiswa_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `mahasiswa_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT untuk tabel `pendaftaran`
 --
 ALTER TABLE `pendaftaran`
-  MODIFY `pendaftaran_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `pendaftaran_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `program_studi`
@@ -279,7 +288,7 @@ ALTER TABLE `tanggal_pendaftaran`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
