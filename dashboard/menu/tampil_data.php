@@ -1,6 +1,13 @@
 <?php 
 session_start();
+<<<<<<< HEAD
 include '../../koneksi.php'; // Menghubungkan ke database
+=======
+include '../../koneksi.php';  // Menghubungkan ke database
+
+
+$user = $_SESSION['user'];  // Mengambil data user dari session
+>>>>>>> e3d5c8daf62bdbb22cc0b65c28b9e8495137118f
 
 // Periksa apakah pengguna sudah login
 if (!isset($_SESSION['user'])) {
