@@ -1,64 +1,20 @@
 <?php
 session_start();
-include '../../koneksi.php'; // Connect to the database
+include '../../koneksi.php';  // Menghubungkan ke database
 
-// Check if the user is logged in
+
+$user = $_SESSION['user'];  // Mengambil data user dari session
+
 if (!isset($_SESSION['user'])) {
+    // Redirect ke halaman login jika belum login
     header("Location: ../../index.php");
     exit;
 }
 
-// Get user data from session
-$user = $_SESSION['user'];
-$user_id = $user['user_id'];
-
-// Declare variables to store data
-$row = [];
-$program_studi = [];
-$kelas = [];
-$rows = [];
-
-// Query to get student and registration information
-try {
-    // Get student and registration information
-    $query = "SELECT m.mahasiswa_id AS id, m.nama_lengkap AS nama, m.nik, m.alamat, m.sekolah_asal, m.tahun_lulus, 
-                     m.no_telp, m.program_studi_id, m.kelas_id, m.nilai_ujian, b.jenis_berkas, b.file_path
-              FROM mahasiswa m
-              LEFT JOIN berkas b ON m.mahasiswa_id = b.mahasiswa_id
-              WHERE m.user_id = :user_id";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Get program studi options
-    $query_program_studi = "SELECT program_studi_id, nama_program_studi FROM program_studi";
-    $stmt_program_studi = $pdo->prepare($query_program_studi);
-    $stmt_program_studi->execute();
-    $program_studi = $stmt_program_studi->fetchAll(PDO::FETCH_ASSOC);
-
-    // Get kelas options
-    $query_kelas = "SELECT kelas_id, nama_kelas FROM kelas";
-    $stmt_kelas = $pdo->prepare($query_kelas);
-    $stmt_kelas->execute();
-    $kelas = $stmt_kelas->fetchAll(PDO::FETCH_ASSOC);
-
-    // Get additional rows (e.g., registration status)
-    $query_rows = "SELECT m.mahasiswa_id AS id, m.nama_lengkap AS nama, m.sekolah_asal AS sekolah, p.status AS keterangan
-                   FROM mahasiswa m
-                   LEFT JOIN pendaftaran p ON m.mahasiswa_id = p.mahasiswa_id
-                   WHERE m.user_id = :user_id";
-    $stmt_rows = $pdo->prepare($query_rows);
-    $stmt_rows->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $stmt_rows->execute();
-    $rows = $stmt_rows->fetchAll(PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
-}
-
 
 ?>
+
+
 
 <!doctype html>
 <!--
@@ -74,17 +30,16 @@ try {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Dashboard - Tanggal Timeline Pendaftaran.</title>
+    <title>Dashboard - Tampil Data <?php echo htmlspecialchars($user['username']); ?>.</title>
     <!-- CSS files -->
     <link href="../../assets/css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-payments.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-vendors.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/demo.min.css?1692870487" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
 
     <style>
       @import url('https://rsms.me/inter/inter.css');
@@ -314,13 +269,13 @@ try {
                   </a>
                 </li>
                
-                <li class="nav-item">
+                <li class="nav-item active">
                   <a class="nav-link" href="#" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
                 </span>
                     <span class="nav-link-title">
-                      Status Pendaftaran
+                      Biodata 
                     </span>
                   </a>
                 </li>
@@ -347,7 +302,7 @@ try {
                   </a>
                 </li>
 
-                <li class="nav-item active">
+                <li class="nav-item">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
@@ -411,7 +366,7 @@ try {
                 <!-- Page pre-title -->
                
                 <h2 class="page-title">
-                 Biodata <?php echo htmlspecialchars($user['username']); ?>
+                Biodata <?php echo htmlspecialchars($user['username']); ?>
                 </h2>
               </div>
               <!-- Page title actions -->
@@ -427,66 +382,48 @@ try {
         <!-- Page body -->
         <div class="page-body">
   <div class="container-xl">
-  <div id="skeleton-loader" class="skeleton-container">
+  <!-- Skeleton Loading -->
+  <!-- Skeleton Loading -->
+
+<div id="skeleton-loader" class="skeleton-container">
     <div class="skeleton skeleton-text skeleton-loading"></div>
     <div class="skeleton skeleton-text skeleton-loading"></div>
     <div class="skeleton skeleton-text skeleton-loading"></div>
 </div>
 
-<!-- Tabel Data -->
 <!-- Tabel Data -->
 <table id="data-table">
-        <thead>
-            <tr>
-                <th>Nomor</th>
-                <th>Nama Pendaftar</th>
-                <th>Asal Sekolah</th>
-                <th>Keterangan</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-        <tbody>
-    <?php
-    if (is_array($rows) && count($rows) > 0) {
-        $no = 1;
-        foreach ($rows as $row) {
-            echo "<tr>";
-            echo "<td>" . $no++ . "</td>"; // Menampilkan nomor urut
-            echo "<td>" . htmlspecialchars($row['nama']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['sekolah']) . "</td>";
 
-            // Menentukan warna keterangan berdasarkan status
-            $keterangan = htmlspecialchars($row['keterangan']);
-            if ($keterangan == 'menunggu') {
-                echo "<td style='color: red;'>$keterangan</td>";
-            } elseif ($keterangan == 'disetujui') {
-                echo "<td style='color: green;'>$keterangan</td>";
-            } else {
-                echo "<td>$keterangan</td>";
-            }
+    <thead>
+        <tr>
+            <th>
+                Nomor
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
+            </th>
+            <th>
+                Nama Mahasiswa
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
+            </th>
+            <th>
+                Tanggal Pendaftaran
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
+            </th>
+            <th>
+                Status
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
+            </th>
+            <th>
+                Keterangan
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Akreditasi"></i>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+   
 
-            // Aksi edit, lihat PDF, dan cetak
-            echo "<td class='aksi-icons'>
-                <i class='fas fa-edit text-success' title='Edit Data' onclick='openEditModal(" . htmlspecialchars($row['id']) . ")'></i>
-                <i class='fas fa-info text-info' title='Detail PDF' onclick='generatePDF(" . htmlspecialchars($row['id']) . ", \"view\")'></i>
-                <i class='fas fa-file-pdf text-danger' title='Cetak PDF' onclick='generatePDF(" . htmlspecialchars($row['id']) . ", \"print\")'></i>
-            </td>";
-            echo "</tr>";
-        }
-    } else {
-        echo "<tr><td colspan='5'>No data found</td></tr>";
-    }
-    ?>
-</tbody>
 
-    </table>
-
-      
-
-  
-</div>
-</div>
+    </tbody>
+</table>
 
 
         <footer class="footer footer-transparent d-print-none">
@@ -521,134 +458,43 @@ try {
         </footer>
       </div>
     </div>
-  
     <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Isi Biodata</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label class="form-label">Nama Lengkap</label>
-            <input type="text" class="form-control" name="nama_lengkap" placeholder="Masukkan Nama Lengkap Anda" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">NIK</label>
-            <input type="number" class="form-control" name="nik" placeholder="Masukkan NIK Anda" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Asal Sekolah</label>
-            <input type="text" class="form-control" name="sekolah_asal" placeholder="Masukkan Asal Sekolah Anda" required>
-          </div>
-
-          <div class="row">
-            <div class="col-lg-8">
-              <div class="mb-3">
-                <label class="form-label">Nomor Telp</label>
-                <div class="input-group input-group-flat">
-                  <span class="input-group-text"></span>
-                  <input type="number" class="form-control ps-0" name="no_telp" required>
-                </div>
-              </div>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Status Pendaftaran</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="col-lg-4">
-              <div class="mb-3">
-                <label class="form-label">Jurusan Pilihan</label>
-                <select class="form-select" name="program_studi" required>
-                  <option value="" selected>Pilih Jurusan</option>
-                  <?php foreach ($program_studi as $program) : ?>
-                    <option value="<?= $program['program_studi_id']; ?>"><?= $program['nama_program_studi']; ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-            </div>
-          </div>
+            <div class="modal-body">
+                <form id="edit-form" method="POST" action="update_status.php">
+                    <input type="hidden" name="mahasiswa_id" id="mahasiswa_id">
 
-          <div class="row">
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label">Biaya Pendaftaran</label>
-                <input type="text" class="form-control" value="1,500,000" readonly>
-              </div>
-            </div>
+                    <div class="mb-3">
+                        <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" readonly>
+                    </div>
 
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label">Pilihan Kelas</label>
-                <select class="form-select" name="kelas" required>
-                  <option value="" selected>Pilih Kelas</option>
-                  <?php foreach ($kelas as $kelas_option) : ?>
-                    <option value="<?= $kelas_option['kelas_id']; ?>"><?= $kelas_option['nama_kelas']; ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-            </div>
-          </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" name="status" id="status">
+                            <option value="menunggu disetujui">Menunggu Disetujui</option>
+                            <option value="disetujui">Disetujui</option>
+                        </select>
+                    </div>
 
-          <hr>
-
-          <div class="row">
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label" for="year">Tahun Lulus</label>
-                <select class="form-control" name="tahun_lulus" required>
-                  <option value="" disabled selected>Select Year</option>
-                  <?php
-                  for ($year = 2000; $year <= 2050; $year++) {
-                    echo "<option value='$year'>$year</option>";
-                  }
-                  ?>
-                </select>
-              </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary ms-auto">
+                            Update Status
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label" for="nilai_ujian">Nilai Ujian</label>
-                <input type="number" class="form-control" name="nilai_ujian" placeholder="Masukkan Nilai Ujian Anda" required>
-
-              </div>
-            </div>
-
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label" for="file">Upload File</label>
-                <input type="file" class="form-control" name="file" accept="application/pdf" required>
-                <div class="form-text text-danger">
-                  Berkas yang diupload: hanya file PDF (ijazah/SKL, kartu keluarga, foto, dan bukti pembayaran) dengan ukuran maksimal 3MB.
-                </div>
-              </div>
-            </div>
-            <div class="mb-3">
-            <label class="form-label">Format Berkas</label>
-            <select class="form-select" name="jenis_berkas" required>
-                <option value="" selected>Pilih Format File Berkas</option>
-                <option value="PDF">PDF</option>
-               
-            </select>
         </div>
-          </div>
-
-          <hr>
-
-          <div class="mb-3">
-            <label class="form-label">Alamat</label>
-            <textarea class="form-control" name="alamat" placeholder="Masukkan Alamat Anda" rows="3" required></textarea>
-          </div>
-
-          <div class="text-end">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
-      </div>
     </div>
-  </div>
 </div>
-
-
 
     <!-- Libs JS -->
     <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
@@ -682,18 +528,14 @@ try {
     let sortOrder = 'desc'; // Urutan default adalah descending (terbesar ke terkecil)
 
     // Fungsi untuk menampilkan data dan menghilangkan skeleton
-document.addEventListener('DOMContentLoaded', function () {
-    const skeletonLoader = document.getElementById('skeleton-loader');
-    const table = document.getElementById('data-table');
+    window.onload = function () {
+      const skeletonLoader = document.getElementById('skeleton-loader');
+      const table = document.getElementById('data-table');
 
-    // Simulasikan waktu pemrosesan data (contoh dengan timeout)
-    setTimeout(() => {
-        // Setelah data dianggap selesai dimuat
-        skeletonLoader.style.display = 'none'; // Sembunyikan skeleton loader
-        table.style.display = 'table';        // Tampilkan tabel data
-    }, 1000); // Sesuaikan durasi ini sesuai dengan waktu loading nyata
-});
-
+      // Sembunyikan skeleton dan tampilkan tabel
+      skeletonLoader.style.display = 'none';
+      table.style.display = 'table';
+    };
 
     function sortTable(columnIndex) {
       const table = document.getElementById("data-table");
@@ -732,33 +574,12 @@ document.addEventListener('DOMContentLoaded', function () {
       lastSortedColumn = columnIndex;
     }
 
-    // Fungsi untuk membuka modal edit
-   
-    function openEditModal(id) {
-    // Set the mahasiswa_id and other form fields dynamically based on the row ID
-    
-    // Open the modal
-    var myModal = new bootstrap.Modal(document.getElementById('modal-report'));
-    myModal.show();
-}
 
 
-  // Function to generate PDF
-  function generatePDF(id) {
-    // You can add your PDF generation logic here, such as sending the id to the server
-    // and generating the PDF dynamically, or using a library like jsPDF.
-    console.log("Generating PDF for ID:", id);
-    
-    // Example of using jsPDF to generate a simple PDF (you can customize it).
-    const doc = new jsPDF();
-    doc.text("This is a PDF for ID: " + id, 10, 10);
-    doc.save("file.pdf");
-  }
+
 
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 
   </body>
 </html>
