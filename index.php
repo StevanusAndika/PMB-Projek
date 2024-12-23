@@ -115,24 +115,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
 
         document.getElementById('login-form').addEventListener('submit', async function (e) {
-            e.preventDefault();
+    e.preventDefault();
 
-            const form = e.target;
-            const formData = new FormData(form);
+    const form = e.target;
+    const formData = new FormData(form);
 
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData
+    const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+        window.location.href = result.redirect;
+    } else {
+        if (result.message === 'Invalid CSRF token') {
+            Swal.fire({
+                title: 'Session Expired',
+                text: 'Your session has expired. The page will refresh automatically.',
+                icon: 'warning',
+                timer: 3000,
+                showConfirmButton: false,
+                willClose: () => {
+                    window.location.reload();
+                }
             });
+        } else {
+            Swal.fire('Error', result.message, 'error');
+        }
+    }
+});
 
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                window.location.href = result.redirect;
-            } else {
-                Swal.fire('Error', result.message, 'error');
-            }
-        });
     </script>
 </body>
 </html>

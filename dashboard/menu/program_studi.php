@@ -157,10 +157,8 @@ try {
             <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href="#">
-            <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
-
-            </a>
+             <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+          <span>Universitas IPWIJA</span>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
             <div class="nav-item d-none d-md-flex me-3">

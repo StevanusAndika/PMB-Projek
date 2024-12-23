@@ -103,6 +103,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':file_path' => $filePath
             ]);
 
+            // Query untuk memasukkan data ke tabel pendaftaran
+            $stmt_pendaftaran = $pdo->prepare("INSERT INTO pendaftaran (mahasiswa_id, status) VALUES (:mahasiswa_id, :status)");
+
+            // Eksekusi query untuk pendaftaran
+            $stmt_pendaftaran->execute([
+                ':mahasiswa_id' => $mahasiswa_id,
+                ':status' => 'menunggu disetujui'
+            ]);
+
             // Notifikasi sukses dengan SweetAlert
             echo "<script>
                     Swal.fire({
@@ -111,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         icon: 'success',
                         confirmButtonText: 'OK'
                     }).then(function() {
-                        window.location = 'tampil_data.php';  // Redirect ke halaman isi_biodata.php
+                        window.location = 'menu/tampil_data.php';  // Redirect ke halaman isi_biodata.php
                     });
                   </script>";
         } else {
@@ -131,8 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </script>";
     }
 }
-?>
 
+?>
 
 
 
@@ -252,10 +261,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href="#">
-            <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
-
-            </a>
+          <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+          <span>Universitas IPWIJA</span>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
             <div class="nav-item d-none d-md-flex me-3">
@@ -622,7 +629,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="row">
             <div class="col-lg-6">
               <div class="mb-3">
-                <label class="form-label" for="year">Tahun Lulus</label>
+                <label class="form-label" for="year" required>Tahun Lulus</label>
                 <select class="form-control" name="tahun_lulus" required>
                   <option value="" disabled selected>Select Year</option>
                   <?php
@@ -724,7 +731,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (result.isConfirmed) {
                 // Jika pengguna mengklik 'Ya, Kirim!', form akan disubmit
                 Swal.fire('Data Terkirim!', 'Data Anda berhasil dikirim!', 'success').then(() => {
-                    document.querySelector('form').submit(); // Melanjutkan proses submit form
+                  // Redirect ke tampil_data.php setelah submit
+                  window.location.href = "tampil_data.php";// Melanjutkan proses submit form
+                    document.querySelector('form').submit(); 
+                    
+                    
                 });
             } else {
                 // Jika pengguna mengklik 'Batal', tampilkan pesan batal
