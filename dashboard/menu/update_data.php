@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Dashboard - User Menu.</title>
+    <title>Dashboard - Update Data.</title>
     <!-- CSS files -->
     <link href="../../assets/css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
@@ -435,7 +435,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Isi Biodata
+                     Update Biodata
                     </span>
                   </a>
                 </li>
@@ -461,6 +461,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </a>
                         <a class="dropdown-item" href="https://pdf.hana-ci.com/compress">
                           PDF Compress
+                          <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
+                        </a>
+                        <a class="dropdown-item" href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
+                         Soal CBT
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
                         
@@ -492,8 +496,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <div class="col">
                 <!-- Page pre-title -->
                 <h2 class="page-title">
-                  Isi Biodata
-                </h2>
+                 Update Biodata
+                                </h2>
                
               </div>
               <!-- Page title actions -->
@@ -516,7 +520,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <path d="M12 5l0 14" />
         <path d="M5 12l14 0" />
     </svg>
-    isi Biodata
+    Update Biodata
 </a>
 
 
@@ -561,7 +565,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Isi Biodata</h5>
+        <h5 class="modal-title">Update Data</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -720,7 +724,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }).then((result) => {
       if (result.isConfirmed) {
         // Arahkan ke tampil_data.php setelah submit
-        window.location.href = 'tampil_data.php';
+       
       }
     });
   });

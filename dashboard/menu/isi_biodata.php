@@ -465,6 +465,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
                         
+                        <a class="dropdown-item" href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
+                         Soal CBT
+                          <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
+                        </a>
                         
                        
                       </div>
@@ -732,7 +736,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Jika pengguna mengklik 'Ya, Kirim!', form akan disubmit
                 Swal.fire('Data Terkirim!', 'Data Anda berhasil dikirim!', 'success').then(() => {
                   // Redirect ke tampil_data.php setelah submit
-                  window.location.href = "tampil_data.php";// Melanjutkan proses submit form
+                 
                     document.querySelector('form').submit(); 
                     
                     

@@ -360,6 +360,13 @@ try {
                           PDF Compress
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
+                        <a class="dropdown-item" href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
+                         Soal CBT
+                          <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
+                        </a>
+                        
+                        
+
                         
                         
                        
