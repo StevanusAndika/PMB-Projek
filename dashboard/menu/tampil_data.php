@@ -4,7 +4,6 @@ include '../../koneksi.php';  // Menghubungkan ke database
 
 
 $user = $_SESSION['user'];  // Mengambil data user dari session
-include '../../koneksi.php'; // Menghubungkan ke database
 
 // Periksa apakah pengguna sudah login
 if (!isset($_SESSION['user'])) {
