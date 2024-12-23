@@ -1,12 +1,22 @@
 <?php 
 session_start();
+include '../../koneksi.php';  // Menghubungkan ke database
+
+
+$user = $_SESSION['user'];  // Mengambil data user dari session
 include '../../koneksi.php'; // Menghubungkan ke database
 
 // Periksa apakah pengguna sudah login
 if (!isset($_SESSION['user'])) {
+    // Redirect ke halaman login jika belum login
     header("Location: ../../index.php");
     exit;
 }
+
+
+?>
+
+
 
 $user = $_SESSION['user'];
 
@@ -42,7 +52,7 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Dashboard - Tanggal Timeline Pendaftaran.</title>
+    <title>Dashboard - Tampil Data <?php echo htmlspecialchars($user['username']); ?>.</title>
     <!-- CSS files -->
     <link href="../../assets/css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
@@ -51,6 +61,7 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="../../assets/css/demo.min.css?1692870487" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
 
     <style>
       @import url('https://rsms.me/inter/inter.css');
@@ -286,13 +297,13 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   </a>
                 </li>
                
-                <li class="nav-item">
+                <li class="nav-item active">
                   <a class="nav-link" href="#" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
                 </span>
                     <span class="nav-link-title">
-                      Status Pendaftaran
+                      Biodata 
                     </span>
                   </a>
                 </li>
@@ -319,7 +330,7 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   </a>
                 </li>
 
-                <li class="nav-item active">
+                <li class="nav-item">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
@@ -387,7 +398,7 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <!-- Page pre-title -->
                
                 <h2 class="page-title">
-                 Biodata <?php echo htmlspecialchars($user['username']); ?>
+                Biodata <?php echo htmlspecialchars($user['username']); ?>
                 </h2>
               </div>
               <!-- Page title actions -->
@@ -403,6 +414,10 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <!-- Page body -->
         <div class="page-body">
   <div class="container-xl">
+  <!-- Skeleton Loading -->
+  <!-- Skeleton Loading -->
+
+<div id="skeleton-loader" class="skeleton-container">
   <!-- Skeleton Loading -->
   <!-- Skeleton Loading -->
 
@@ -465,6 +480,39 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tbody>
     </table>
 </div>
+<!-- Tabel Data -->
+<table id="data-table">
+
+    <thead>
+        <tr>
+            <th>
+                Nomor
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
+            </th>
+            <th>
+                Nama Mahasiswa
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
+            </th>
+            <th>
+                Tanggal Pendaftaran
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
+            </th>
+            <th>
+                Status
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
+            </th>
+            <th>
+                Keterangan
+                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Akreditasi"></i>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+   
+
+
+    </tbody>
+</table>
 
 
         <footer class="footer footer-transparent d-print-none">
@@ -500,6 +548,20 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
     </div>
     <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Status Pendaftaran</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form" method="POST" action="update_status.php">
+                    <input type="hidden" name="mahasiswa_id" id="mahasiswa_id">
+
+                    <div class="mb-3">
+                        <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" readonly>
+                    </div>
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -549,6 +611,26 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
           </div>
 
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" name="status" id="status">
+                            <option value="menunggu disetujui">Menunggu Disetujui</option>
+                            <option value="disetujui">Disetujui</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary ms-auto">
+                            Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
           <div class="row">
             <div class="col-lg-6">
               <div class="mb-3">
@@ -658,7 +740,14 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
     window.onload = function () {
       const skeletonLoader = document.getElementById('skeleton-loader');
       const table = document.getElementById('data-table');
+    window.onload = function () {
+      const skeletonLoader = document.getElementById('skeleton-loader');
+      const table = document.getElementById('data-table');
 
+      // Sembunyikan skeleton dan tampilkan tabel
+      skeletonLoader.style.display = 'none';
+      table.style.display = 'table';
+    };
       // Sembunyikan skeleton dan tampilkan tabel
       skeletonLoader.style.display = 'none';
       table.style.display = 'table';
@@ -717,6 +806,11 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         });
     }
+
+
+
+
+
 </script>
 
   </body>
