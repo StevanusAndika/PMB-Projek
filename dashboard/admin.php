@@ -61,9 +61,8 @@ $user = $_SESSION['user'];
             <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href="#">
-            <img src="../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
-            </a>
+           <img src="../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+            <span>Universitas IPWIJA</span>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
             <div class="nav-item d-none d-md-flex me-3">
@@ -210,7 +209,7 @@ $user = $_SESSION['user'];
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/admin_liatdata.php#" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg>
                 </span>
@@ -289,7 +288,7 @@ $user = $_SESSION['user'];
 
       <!-- Card 2 -->
       <div class="col-sm-12 col-lg-6 mb-3">
-        <a href="#" class="card text-decoration-none">
+        <a href="http://localhost/PMB-Projek/dashboard/menu/admin_liatdata.php#" class="card text-decoration-none">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="subheader">Lihat Data User</div>

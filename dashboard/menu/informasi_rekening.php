@@ -17,29 +17,12 @@ $user = $_SESSION['user'];
 
 
 
-$stmt = $pdo->prepare("SELECT username, password, role, created_at FROM users WHERE email = :email");
-$stmt->execute(['email' => $user['email']]);
-$data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$data) {
-  echo "Data user tidak ditemukan.";
-  exit;
-}
 
 
-try {
-    // Query untuk mengambil data dari tabel
-    $query = "SELECT program_studi_id, nama_program_studi, status_akreditasi FROM program_studi";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute();//stmt is statement
-    
-    // Ambil semua data
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Query Error: " . $e->getMessage());
+
 
    
-}
+
 ?>
 
 
@@ -282,7 +265,7 @@ try {
           <div class="navbar">
             <div class="container-xl">
               <ul class="navbar-nav">
-                <li class="nav-item ">
+                <li class="nav-item active ">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/user.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
                       <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
@@ -315,7 +298,7 @@ try {
                 </li>
 
                 
-                <li class="nav-item active">
+                <li class="nav-item ">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-school"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" /><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" /></svg>
@@ -353,14 +336,14 @@ try {
                         <a class="dropdown-item" href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0">
                           WhatsApp PMB
                         </a>
-                        <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/informasi_rekening.php">
+                        <a class="dropdown-item active" href="#">
                          Rekening Pembayaran
                         </a>
                         <a class="dropdown-item" href="https://pdf.hana-ci.com/compress">
                           PDF Compress
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
-                        <a class="dropdown-item" href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
+                        <a class="dropdown-item " href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
                          Soal CBT
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
@@ -397,7 +380,7 @@ try {
                 <!-- Page pre-title -->
                
                 <h2 class="page-title">
-                 Daftar Program Studi  Universitas IPWIJA
+                 Informasi Rekening Pembayaran Universitas IPWIJA
                 </h2>
               </div>
               <!-- Page title actions -->
@@ -420,40 +403,46 @@ try {
         <div class="skeleton skeleton-text skeleton-loading"></div>
       </div>
 
-      <!-- Tabel Data -->
-      <table id="data-table">
-        <thead>
-          <tr>
-            <th>
-              ID
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
-            </th>
-            <th>
-              Nama Program Studi
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
-            </th>
-            <th>
-              Status Akreditasi
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Akreditasi"></i>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (!empty($rows)): ?>
-            <?php foreach ($rows as $row): ?>
-              <tr>
-                <td><?= htmlspecialchars($row['program_studi_id']) ?></td>
-                <td><?= htmlspecialchars($row['nama_program_studi']) ?></td>
-                <td><?= htmlspecialchars($row['status_akreditasi']) ?></td>
-              </tr>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <tr>
-              <td colspan="3">Tidak ada data.</td>
-            </tr>
-          <?php endif; ?>
-        </tbody>
-      </table>
+     <!-- Tabel Data -->
+<table id="data-table">
+  <thead>
+    <tr>
+      <th>
+        ID
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
+      </th>
+      <th>
+        Nomor Rekening
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nomor Rekening"></i>
+      </th>
+      <th>
+        Nama Bank
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Nama Bank"></i>
+      </th>
+      <th>
+        Aksi
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td id="rekening-1">1234567890</td>
+      <td>Bank BJPS</td>
+      <td>
+        <i class="fas fa-copy action-icon" onclick="copyRekening('rekening-1')" title="Salin Nomor Rekening"></i>
+      </td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td id="rekening-2">9876543210</td>
+      <td>Bank Mandiri/Sevima Pay</td>
+      <td>
+        <i class="fas fa-copy action-icon" onclick="copyRekening('rekening-2')" title="Salin Nomor Rekening"></i>
+      </td>
+    </tr>
+  </tbody>
+</table>
     </div>
   </div>
       </div>
@@ -671,6 +660,26 @@ try {
       // Melacak kolom yang terakhir diurutkan
       lastSortedColumn = columnIndex;
     }
+
+    // Fungsi untuk menyalin nomor rekening
+  function copyRekening(id) {
+    const rekening = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(rekening).then(() => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Nomor rekening berhasil disalin',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }).catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: 'Nomor rekening tidak dapat disalin',
+      });
+    });
+  }
 </script>
 
   </body>

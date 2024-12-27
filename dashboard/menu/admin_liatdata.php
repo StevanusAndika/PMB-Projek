@@ -1,45 +1,19 @@
 <?php
 session_start();
-// Menghubungkan ke database menggunakan PDO
-include '../../koneksi.php';
 
-If (!isset($_SESSION['user'])) {
+// Check if the user is logged in
+if (!isset($_SESSION['user'])) {
   // Redirect to login if not logged in
   header("Location: ../../index.php");
   exit;
 }
 
-
-// Ambil data user dari session
+// Retrieve user information from session
 $user = $_SESSION['user'];
-// Query untuk mendapatkan data lengkap dari database
+
+// Check if the role is 'user'
 
 
-
-
-$stmt = $pdo->prepare("SELECT username, password, role, created_at FROM users WHERE email = :email");
-$stmt->execute(['email' => $user['email']]);
-$data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$data) {
-  echo "Data user tidak ditemukan.";
-  exit;
-}
-
-
-try {
-    // Query untuk mengambil data dari tabel
-    $query = "SELECT program_studi_id, nama_program_studi, status_akreditasi FROM program_studi";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute();//stmt is statement
-    
-    // Ambil semua data
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Query Error: " . $e->getMessage());
-
-   
-}
 ?>
 
 
@@ -57,15 +31,15 @@ try {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Dashboard - Program Studi.</title>
+    <title>Dashboard | Admin menu </title>
     <!-- CSS files -->
     <link href="../../assets/css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-payments.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-vendors.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/demo.min.css?1692870487" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="../../assets/libs/sweetalert2/index.js"></script>
 
     <style>
       @import url('https://rsms.me/inter/inter.css');
@@ -75,76 +49,6 @@ try {
       body {
       	font-feature-settings: "cv03", "cv04", "cv11";
       }
-
-      table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      display: none; /* Sembunyikan tabel sampai data dimuat */
-    }
-
-    table, th, td {
-      border: 1px solid #ddd;
-    }
-
-    th, td {
-      padding: 10px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f4f4f4;
-      position: relative;
-    }
-
-    .filter-icon {
-      font-size: 14px;
-      color: #007BFF;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    .filter-icon:hover {
-      color: #0056b3;
-    }
-
-    /* CSS untuk Skeleton Loading */
-    .skeleton {
-      background-color: #e0e0e0;
-      height: 20px;
-      margin: 10px 0;
-      border-radius: 4px;
-    }
-
-    .skeleton-text {
-      background-color: #e0e0e0;
-      height: 15px;
-      margin: 10px 0;
-      border-radius: 4px;
-    }
-
-    .skeleton-loading {
-      display: block;
-      animation: loading 2s infinite ease-in-out;
-    }
-
-    @keyframes loading {
-      0% {
-        background-color: #e0e0e0;
-      }
-      50% {
-        background-color: #f4f4f4;
-      }
-      100% {
-        background-color: #e0e0e0;
-      }
-    }
-
-    .skeleton-container {
-      display: flex;
-      flex-direction: column;
-    }
-
     </style>
   </head>
   <body >
@@ -157,7 +61,7 @@ try {
             <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-             <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+          <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
           <span>Universitas IPWIJA</span>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
@@ -257,15 +161,16 @@ try {
             </div>
             <div class="nav-item dropdown">
               <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
-                <span class="avatar avatar-sm" style="background-image: url(../static/avatars/000m.jpg)"></span>
-                <div class="d-none d-xl-block ps-2">
+              <span class="avatar avatar-sm" style="background-image: url('dashboard/assets/avatars/000f.jpg')"></span>
+
+              <div class="d-none d-xl-block ps-2">
                   <div><?php echo htmlspecialchars($user['username']); ?></div>
                   <div class="mt-1 small text-secondary"><?php echo htmlspecialchars($user['email']); ?></div>
                 </div>
               </a>
               <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <a href="http://localhost/PMB-Projek/dashboard/menu/profile_user.php" class="dropdown-item">Profile</a>
-                
+              <a href="http://localhost/PMB-Projek/dashboard/menu/profile.php" class="dropdown-item">Profile</a>
+
                 
                 <div class="dropdown-divider"></div>
                 
@@ -283,7 +188,7 @@ try {
             <div class="container-xl">
               <ul class="navbar-nav">
                 <li class="nav-item ">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/user.php" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/admin.php#" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
                       <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
                     </span>
@@ -294,90 +199,42 @@ try {
                 </li>
                
                 <li class="nav-item">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/status_pendaftaran_user.php" >
+                  <a class="nav-link" href="#" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
                 </span>
                     <span class="nav-link-title">
-                      Status Pendaftaran
+                      Setujui Data User
                     </span>
                   </a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/tanggal_daftar.php" >
+                <li class="nav-item active">
+                  <a class="nav-link " href="#" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-week"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M8 14v4" /><path d="M12 14v4" /><path d="M16 14v4" /></svg>
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Jadwal Pendaftaran
+                     Lihat Data User
                     </span>
                   </a>
                 </li>
 
                 
-                <li class="nav-item active">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" >
-                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-school"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" /><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" /></svg>
-                </span>
-                    <span class="nav-link-title">
-                      Program Studi
-                    </span>
-                  </a>
-                </li>
-
                 <li class="nav-item">
-                  <a class="nav-link" href="isi_biodata.php" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/profile.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-users"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Isi Biodata
+                     Profil
                     </span>
                   </a>
                 </li>
 
+                
 
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
-                    <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/star -->
-                      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" /></svg>
-                    </span>
-                    <span class="nav-link-title">
-                      Extra
-                    </span>
-                  </a>
-                  <div class="dropdown-menu">
-                    <div class="dropdown-menu-columns">
-                      <div class="dropdown-menu-column">
-                        <a class="dropdown-item" href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0">
-                          WhatsApp PMB
-                        </a>
-                        <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/informasi_rekening.php">
-                         Rekening Pembayaran
-                        </a>
-                        <a class="dropdown-item" href="https://pdf.hana-ci.com/compress">
-                          PDF Compress
-                          <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
-                        </a>
-                        <a class="dropdown-item" href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
-                         Soal CBT
-                          <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
-                        </a>
-                        
-                        
 
-                        
-                        
-                       
-                      </div>
-                      <div class="dropdown-menu-column">
-                       
-                          
-                      </div>
-                    </div>
-                  </div>
-                </li>
+              
                 
                
                
@@ -397,7 +254,7 @@ try {
                 <!-- Page pre-title -->
                
                 <h2 class="page-title">
-                 Daftar Program Studi  Universitas IPWIJA
+                 Lihat Data User
                 </h2>
               </div>
               <!-- Page title actions -->
@@ -413,52 +270,9 @@ try {
         <!-- Page body -->
         <div class="page-body">
   <div class="container-xl">
-  <!-- Skeleton Loading -->
-  <div id="skeleton-loader" class="skeleton-container">
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-      </div>
-
-      <!-- Tabel Data -->
-      <table id="data-table">
-        <thead>
-          <tr>
-            <th>
-              ID
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
-            </th>
-            <th>
-              Nama Program Studi
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
-            </th>
-            <th>
-              Status Akreditasi
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Akreditasi"></i>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (!empty($rows)): ?>
-            <?php foreach ($rows as $row): ?>
-              <tr>
-                <td><?= htmlspecialchars($row['program_studi_id']) ?></td>
-                <td><?= htmlspecialchars($row['nama_program_studi']) ?></td>
-                <td><?= htmlspecialchars($row['status_akreditasi']) ?></td>
-              </tr>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <tr>
-              <td colspan="3">Tidak ada data.</td>
-            </tr>
-          <?php endif; ?>
-        </tbody>
-      </table>
-    </div>
+  
   </div>
-      </div>
 </div>
-
 
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
@@ -595,82 +409,33 @@ try {
       </div>
     </div>
     <!-- Libs JS -->
-    <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
-    <script src="../../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>
-    <script src="../../assets/libs/jsvectormap/dist/maps/world.js?1692870487" defer></script>
-    <script src="../../assets/libs/jsvectormap/dist/maps/world-merc.js?1692870487" defer></script>
+    <script src="../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
+    <script src="../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>
+    <script src="../assets/libs/jsvectormap/dist/maps/world.js?1692870487" defer></script>
+    <script src="../assets/libs/jsvectormap/dist/maps/world-merc.js?1692870487" defer></script>
     <!-- Tabler Core -->
-    <script src="../../assets/js/tabler.min.js?1692870487" defer></script>
-    <script src="../../assets/js/demo.min.js?1692870487" defer></script>
+    <script src="../assets/js/tabler.min.js?1692870487" defer></script>
+    <script src="../assets/js/demo.min.js?1692870487" defer></script>
 
     <script>
     document.getElementById('logoutLink').addEventListener('click', function (event) {
-        event.preventDefault(); // Mencegah aksi default tautan
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You will be logged out!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, logout!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect ke index.php
-                window.location.href = '../../index.php';
-            }
-        });
-    });
-
-    let lastSortedColumn = -1; // Variabel untuk melacak kolom yang terakhir diurutkan
-    let sortOrder = 'desc'; // Urutan default adalah descending (terbesar ke terkecil)
-
-    // Fungsi untuk menampilkan data dan menghilangkan skeleton
-    window.onload = function () {
-      const skeletonLoader = document.getElementById('skeleton-loader');
-      const table = document.getElementById('data-table');
-
-      // Sembunyikan skeleton dan tampilkan tabel
-      skeletonLoader.style.display = 'none';
-      table.style.display = 'table';
-    };
-
-    function sortTable(columnIndex) {
-      const table = document.getElementById("data-table");
-      const tbody = table.tBodies[0];
-      const rows = Array.from(tbody.rows);
-
-      // Cek apakah kolom yang sama yang diklik sebelumnya
-      if (lastSortedColumn === columnIndex) {
-        sortOrder = (sortOrder === 'desc') ? 'asc' : 'desc'; // Toggle urutan
-      } else {
-        sortOrder = 'desc'; // Jika kolom berbeda, defaultkan ke descending
-      }
-
-      // Mengurutkan berdasarkan kolom yang dipilih dari besar ke kecil atau kecil ke besar
-      rows.sort((a, b) => {
-        const aValue = a.cells[columnIndex].textContent.trim().toLowerCase();
-        const bValue = b.cells[columnIndex].textContent.trim().toLowerCase();
-
-        // Jika kolom angka, gunakan parseInt untuk konversi
-        if (!isNaN(aValue) && !isNaN(bValue)) {
-          return sortOrder === 'desc' 
-            ? parseInt(bValue, 10) - parseInt(aValue, 10) 
-            : parseInt(aValue, 10) - parseInt(bValue, 10);
+    event.preventDefault(); // Mencegah aksi default tautan
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You will be logged out!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, logout!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect ke script PHP untuk menghancurkan session
+            window.location.href = 'logout.php';
         }
+    });
+});
 
-        // Jika kolom teks, gunakan string comparison
-        return sortOrder === 'desc' 
-          ? bValue.localeCompare(aValue) 
-          : aValue.localeCompare(bValue);
-      });
-
-      // Reorder rows dalam tabel
-      rows.forEach(row => tbody.appendChild(row));
-
-      // Melacak kolom yang terakhir diurutkan
-      lastSortedColumn = columnIndex;
-    }
 </script>
 
   </body>

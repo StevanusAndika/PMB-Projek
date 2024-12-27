@@ -1,48 +1,28 @@
-<?php
+<?php 
 session_start();
-// Menghubungkan ke database menggunakan PDO
-include '../../koneksi.php';
+include '../../koneksi.php'; // Menghubungkan ke database
 
-If (!isset($_SESSION['user'])) {
-  // Redirect to login if not logged in
-  header("Location: ../../index.php");
-  exit;
+// Periksa apakah pengguna sudah login
+if (!isset($_SESSION['user'])) {
+    header("Location: ../../index.php");
+    exit;
 }
 
-
-// Ambil data user dari session
 $user = $_SESSION['user'];
-// Query untuk mendapatkan data lengkap dari database
 
+// Query untuk mendapatkan data mahasiswa dan status pendaftaran
+$query = "SELECT m.*, 
+                 
+                 d.status AS status_pendaftaran
+          FROM mahasiswa m
+        
+          LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id
+          WHERE m.user_id = ?";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user['user_id']]);
+$data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-
-$stmt = $pdo->prepare("SELECT username, password, role, created_at FROM users WHERE email = :email");
-$stmt->execute(['email' => $user['email']]);
-$data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$data) {
-  echo "Data user tidak ditemukan.";
-  exit;
-}
-
-
-try {
-    // Query untuk mengambil data dari tabel
-    $query = "SELECT program_studi_id, nama_program_studi, status_akreditasi FROM program_studi";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute();//stmt is statement
-    
-    // Ambil semua data
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Query Error: " . $e->getMessage());
-
-   
-}
 ?>
-
-
 <!doctype html>
 <!--
 * Tabler - Premium and Open Source dashboard template with responsive and high quality UI.
@@ -57,7 +37,7 @@ try {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Dashboard - Program Studi.</title>
+    <title>Dashboard - Status Pendaftaran.</title>
     <!-- CSS files -->
     <link href="../../assets/css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
@@ -75,6 +55,14 @@ try {
       body {
       	font-feature-settings: "cv03", "cv04", "cv11";
       }
+          .hover-icon {
+        transition: transform 0.2s, color 0.2s; /* Efek transisi */
+    }
+
+    .hover-icon:hover {
+        transform: scale(1.2); /* Membesarkan ikon */
+        color: #0056b3; /* Mengubah warna saat hover */
+    }
 
       table {
       width: 100%;
@@ -157,7 +145,7 @@ try {
             <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-             <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+          <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
           <span>Universitas IPWIJA</span>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
@@ -293,7 +281,7 @@ try {
                   </a>
                 </li>
                
-                <li class="nav-item">
+                <li class="nav-item active">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/status_pendaftaran_user.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
@@ -303,7 +291,7 @@ try {
                     </span>
                   </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item ">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/tanggal_daftar.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-week"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M8 14v4" /><path d="M12 14v4" /><path d="M16 14v4" /></svg>
@@ -315,7 +303,7 @@ try {
                 </li>
 
                 
-                <li class="nav-item active">
+                <li class="nav-item ">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-school"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" /><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" /></svg>
@@ -326,8 +314,8 @@ try {
                   </a>
                 </li>
 
-                <li class="nav-item">
-                  <a class="nav-link" href="isi_biodata.php" >
+                <li class="nav-item ">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
                 </span>
@@ -356,7 +344,7 @@ try {
                         <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/informasi_rekening.php">
                          Rekening Pembayaran
                         </a>
-                        <a class="dropdown-item" href="https://pdf.hana-ci.com/compress">
+                        <a class="dropdown-item" href="https://pdf.hana-ci.com/compress"target="_blank">
                           PDF Compress
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
@@ -364,9 +352,6 @@ try {
                          Soal CBT
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
-                        
-                        
-
                         
                         
                        
@@ -397,7 +382,7 @@ try {
                 <!-- Page pre-title -->
                
                 <h2 class="page-title">
-                 Daftar Program Studi  Universitas IPWIJA
+                 Status Pendaftaran <?php echo htmlspecialchars($user['username']); ?>
                 </h2>
               </div>
               <!-- Page title actions -->
@@ -414,49 +399,41 @@ try {
         <div class="page-body">
   <div class="container-xl">
   <!-- Skeleton Loading -->
-  <div id="skeleton-loader" class="skeleton-container">
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-      </div>
+  <!-- Skeleton Loading -->
 
-      <!-- Tabel Data -->
-      <table id="data-table">
+<div id="skeleton-loader" class="skeleton-container">
+    <div class="skeleton skeleton-text skeleton-loading"></div>
+    <div class="skeleton skeleton-text skeleton-loading"></div>
+    <div class="skeleton skeleton-text skeleton-loading"></div>
+</div>
+
+<!-- Tabel Data -->
+<div class="table-responsive">
+    <table id="data-table" class="table table-bordered">
         <thead>
-          <tr>
-            <th>
-              ID
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
-            </th>
-            <th>
-              Nama Program Studi
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
-            </th>
-            <th>
-              Status Akreditasi
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Akreditasi"></i>
-            </th>
-          </tr>
+            <tr>
+                <th>Nomor</th>
+                <th>Nama Mahasiswa</th>
+            
+                <th>Status Pendaftaran</th>
+             
+                
+            </tr>
         </thead>
         <tbody>
-          <?php if (!empty($rows)): ?>
-            <?php foreach ($rows as $row): ?>
-              <tr>
-                <td><?= htmlspecialchars($row['program_studi_id']) ?></td>
-                <td><?= htmlspecialchars($row['nama_program_studi']) ?></td>
-                <td><?= htmlspecialchars($row['status_akreditasi']) ?></td>
-              </tr>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <tr>
-              <td colspan="3">Tidak ada data.</td>
-            </tr>
-          <?php endif; ?>
+            <?php
+                foreach ($data_mahasiswa as $index => $row) {
+                    echo "<tr>
+                            <td>" . ($index + 1) . "</td>
+                            <td>{$row['nama_lengkap']}</td>
+                            
+                            
+                            
+                            <td>{$row['status_pendaftaran']}</td>";
+                }
+            ?>
         </tbody>
-      </table>
-    </div>
-  </div>
-      </div>
+    </table>
 </div>
 
 
@@ -492,108 +469,7 @@ try {
         </footer>
       </div>
     </div>
-    <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">New report</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Name</label>
-              <input type="text" class="form-control" name="example-text-input" placeholder="Your report name">
-            </div>
-            <label class="form-label">Report type</label>
-            <div class="form-selectgroup-boxes row mb-3">
-              <div class="col-lg-6">
-                <label class="form-selectgroup-item">
-                  <input type="radio" name="report-type" value="1" class="form-selectgroup-input" checked>
-                  <span class="form-selectgroup-label d-flex align-items-center p-3">
-                    <span class="me-3">
-                      <span class="form-selectgroup-check"></span>
-                    </span>
-                    <span class="form-selectgroup-label-content">
-                      <span class="form-selectgroup-title strong mb-1">Simple</span>
-                      <span class="d-block text-secondary">Provide only basic data needed for the report</span>
-                    </span>
-                  </span>
-                </label>
-              </div>
-              <div class="col-lg-6">
-                <label class="form-selectgroup-item">
-                  <input type="radio" name="report-type" value="1" class="form-selectgroup-input">
-                  <span class="form-selectgroup-label d-flex align-items-center p-3">
-                    <span class="me-3">
-                      <span class="form-selectgroup-check"></span>
-                    </span>
-                    <span class="form-selectgroup-label-content">
-                      <span class="form-selectgroup-title strong mb-1">Advanced</span>
-                      <span class="d-block text-secondary">Insert charts and additional advanced analyses to be inserted in the report</span>
-                    </span>
-                  </span>
-                </label>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-lg-8">
-                <div class="mb-3">
-                  <label class="form-label">Report url</label>
-                  <div class="input-group input-group-flat">
-                    <span class="input-group-text">
-                      https://tabler.io/reports/
-                    </span>
-                    <input type="text" class="form-control ps-0"  value="report-01" autocomplete="off">
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="mb-3">
-                  <label class="form-label">Visibility</label>
-                  <select class="form-select">
-                    <option value="1" selected>Private</option>
-                    <option value="2">Public</option>
-                    <option value="3">Hidden</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="mb-3">
-                  <label class="form-label">Client name</label>
-                  <input type="text" class="form-control">
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="mb-3">
-                  <label class="form-label">Reporting period</label>
-                  <input type="date" class="form-control">
-                </div>
-              </div>
-              <div class="col-lg-12">
-                <div>
-                  <label class="form-label">Additional information</label>
-                  <textarea class="form-control" rows="3"></textarea>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-              Cancel
-            </a>
-            <a href="#" class="btn btn-primary ms-auto" data-bs-dismiss="modal">
-              <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-              Create new report
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
+   
     <!-- Libs JS -->
     <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
     <script src="../../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>
@@ -670,6 +546,23 @@ try {
 
       // Melacak kolom yang terakhir diurutkan
       lastSortedColumn = columnIndex;
+    }
+
+    function confirmDelete(mahasiswaId) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect to the delete URL with mahasiswa_id
+                window.location.href = 'delete_data.php?id=' + mahasiswaId;
+            }
+        });
     }
 </script>
 

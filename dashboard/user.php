@@ -214,7 +214,7 @@ if (!$data) {
                 </li>
                
                 <li class="nav-item">
-                  <a class="nav-link" href="#" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/status_pendaftaran_user.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
                 </span>
@@ -273,7 +273,7 @@ if (!$data) {
                         <a class="dropdown-item" href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0">
                           WhatsApp PMB
                         </a>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="menu/informasi_rekening.php">
                          Rekening Pembayaran
                         </a>
                         <a class="dropdown-item" href="https://pdf.hana-ci.com/compress"target="_blank">
@@ -333,7 +333,7 @@ if (!$data) {
     <div class="row row-deck row-cards">
       <!-- Card 1 -->
       <div class="col-sm-12 col-lg-6 mb-3">
-        <a href="#status-pendaftaran" class="card text-decoration-none">
+        <a href="http://localhost/PMB-Projek/dashboard/menu/status_pendaftaran_user.php" class="card text-decoration-none">
           <div class="card-body">
             <div class="d-flex align-items-center"> 
               <div class="subheader">Status Pendaftaran</div>
