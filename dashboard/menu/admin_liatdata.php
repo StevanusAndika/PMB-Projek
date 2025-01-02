@@ -1,20 +1,3 @@
-<?php
-session_start();
-
-// Check if the user is logged in
-if (!isset($_SESSION['user'])) {
-  // Redirect to login if not logged in
-  header("Location: ../../index.php");
-  exit;
-}
-
-// Retrieve user information from session
-$user = $_SESSION['user'];
-
-// Check if the role is 'user'
-
-
-?>
 
 
 <!doctype html>

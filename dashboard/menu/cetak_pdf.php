@@ -48,3 +48,5 @@ foreach ($data_mahasiswa as $field => $value) {
 
 // Output PDF
 $pdf->Output('D', 'data_mahasiswa.pdf'); // Mengunduh file
+
+?>

@@ -10,17 +10,23 @@ if (!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 
-// Query untuk mendapatkan data mahasiswa dan status pendaftaran
-$query = "SELECT m.*, 
-                 
-                 d.status AS status_pendaftaran
-          FROM mahasiswa m
-        
-          LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id
-          WHERE m.user_id = ?";
+// Ambil data user_id yang login
+$user_id = $user['user_id'];
+
+// Query untuk mengambil data mahasiswa dan status pendaftaran berdasarkan user_id
+$query = "
+    SELECT 
+        m.nama_lengkap, 
+        p.status AS status_pendaftaran
+    FROM mahasiswa m
+    JOIN pendaftaran p ON m.mahasiswa_id = p.mahasiswa_id
+    WHERE m.user_id = :user_id
+";
+
 $stmt = $pdo->prepare($query);
-$stmt->execute([$user['user_id']]);
-$data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$data_mahasiswa = $stmt->fetchAll();
 
 ?>
 <!doctype html>
@@ -407,17 +413,13 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="skeleton skeleton-text skeleton-loading"></div>
 </div>
 
-<!-- Tabel Data -->
 <div class="table-responsive">
     <table id="data-table" class="table table-bordered">
         <thead>
             <tr>
                 <th>Nomor</th>
                 <th>Nama Mahasiswa</th>
-            
                 <th>Status Pendaftaran</th>
-             
-                
             </tr>
         </thead>
         <tbody>
@@ -426,16 +428,13 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     echo "<tr>
                             <td>" . ($index + 1) . "</td>
                             <td>{$row['nama_lengkap']}</td>
-                            
-                            
-                            
-                            <td>{$row['status_pendaftaran']}</td>";
+                            <td>{$row['status_pendaftaran']}</td>
+                          </tr>";
                 }
             ?>
         </tbody>
     </table>
 </div>
-
 
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
@@ -548,22 +547,7 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
       lastSortedColumn = columnIndex;
     }
 
-    function confirmDelete(mahasiswaId) {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data ini akan dihapus permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect to the delete URL with mahasiswa_id
-                window.location.href = 'delete_data.php?id=' + mahasiswaId;
-            }
-        });
-    }
+  
 </script>
 
   </body>
