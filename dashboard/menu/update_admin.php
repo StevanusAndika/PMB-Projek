@@ -1,47 +1,151 @@
 <?php
+// Menghubungkan ke database menggunakan PDO
 session_start();
-include '../../koneksi.php'; // Menghubungkan ke database
+include '../../koneksi.php';
 
-// Periksa apakah pengguna sudah login
+// Pastikan user sudah login
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../index.php");
+    echo "User not logged in.";
     exit;
 }
 
-$user = $_SESSION['user'];
+$user = $_SESSION['user'];  // Mengambil data user dari session
+$user_id = $user['user_id'];  // ID pengguna yang sedang login
 
-// Ambil data user_id yang login
-$user_id = $user['user_id'];
+// Ambil data program studi dan kelas dari database
+$stmt_program_studi = $pdo->query("SELECT * FROM program_studi");
+$program_studi = $stmt_program_studi->fetchAll(PDO::FETCH_ASSOC);
 
-// Query untuk mendapatkan role dari tabel users
-$queryRole = "SELECT role FROM users WHERE user_id = ?";
-$stmtRole = $pdo->prepare($queryRole);
-$stmtRole->execute([$user_id]);
-$resultRole = $stmtRole->fetch(PDO::FETCH_ASSOC);
+$stmt_kelas = $pdo->query("SELECT * FROM kelas");
+$kelas = $stmt_kelas->fetchAll(PDO::FETCH_ASSOC);
 
-// Periksa apakah role adalah admin
-if ($resultRole['role'] === 'admin') {
-    echo "<h1>Akses ditolak. Halaman ini tidak tersedia untuk role admin.</h1>";
-    exit;
+// Ambil data mahasiswa berdasarkan user_id
+$stmt_mahasiswa = $pdo->prepare("SELECT * FROM mahasiswa WHERE user_id = :user_id LIMIT 1");
+$stmt_mahasiswa->execute([':user_id' => $user_id]);
+$mahasiswa = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
+
+// Cek apakah form disubmit
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Ambil data dari form
+    $nama_lengkap = $_POST['nama_lengkap'];
+    $nik = $_POST['nik'];
+    $sekolah_asal = $_POST['sekolah_asal'];
+    $no_telp = $_POST['no_telp'];
+    $program_studi_id = $_POST['program_studi'];
+    $kelas_id = $_POST['kelas'];
+    $tahun_lulus = $_POST['tahun_lulus'];
+    $alamat = $_POST['alamat'];
+    $jenis_berkas = $_POST['jenis_berkas'];
+    $nilai_ujian = $_POST['nilai_ujian'];  // Ambil nilai_ujian dari form
+
+    // Validasi file yang diupload
+    if (isset($_FILES['file'])) {
+        $file = $_FILES['file'];
+
+        // Cek ukuran file (maksimal 3MB)
+        if ($file['size'] > 3145728) {
+            echo "<script>Swal.fire('Error!', 'File size exceeds 3MB!', 'error');</script>";
+            exit;
+        }
+
+        // Cek tipe file (hanya PDF yang diizinkan)
+        $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        if ($fileExtension !== 'pdf') {
+            echo "<script>Swal.fire('Error!', 'Only PDF files are allowed!', 'error');</script>";
+            exit;
+        }
+
+        // Mengacak nama file
+        $randomFileName = uniqid('file_', true) . '.' . $fileExtension;
+        $filePath = "../../uploads/" . $randomFileName;
+
+        // Pastikan folder uploads ada
+        if (!is_dir("../../uploads")) {
+            mkdir("../../uploads", 0777, true);  // Membuat folder uploads jika belum ada
+        }
+
+        // Pindahkan file ke folder tujuan
+        if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+            echo "<script>Swal.fire('Error!', 'Failed to upload the file!', 'error');</script>";
+            exit;
+        }
+    } else {
+        echo "<script>Swal.fire('Error!', 'File upload failed!', 'error');</script>";
+        exit;
+    }
+
+    // Update data mahasiswa di database atau insert jika belum ada data
+    try {
+        if ($mahasiswa) {
+            // Update data mahasiswa
+            $stmt = $pdo->prepare("UPDATE mahasiswa SET 
+                                    nama_lengkap = :nama_lengkap, 
+                                    nik = :nik, 
+                                    sekolah_asal = :sekolah_asal, 
+                                    no_telp = :no_telp, 
+                                    program_studi_id = :program_studi_id, 
+                                    kelas_id = :kelas_id, 
+                                    tahun_lulus = :tahun_lulus, 
+                                    alamat = :alamat,
+                                    nilai_ujian = :nilai_ujian 
+                                    WHERE user_id = :user_id");
+
+            $stmt->execute([
+                ':user_id' => $user_id,
+                ':nama_lengkap' => $nama_lengkap,
+                ':nik' => $nik,
+                ':sekolah_asal' => $sekolah_asal,
+                ':no_telp' => $no_telp,
+                ':program_studi_id' => $program_studi_id,
+                ':kelas_id' => $kelas_id,
+                ':tahun_lulus' => $tahun_lulus,
+                ':alamat' => $alamat,
+                ':nilai_ujian' => $nilai_ujian
+            ]);
+        } else {
+            // Insert data mahasiswa baru
+            $stmt = $pdo->prepare("INSERT INTO mahasiswa (user_id, nama_lengkap, nik, sekolah_asal, no_telp, program_studi_id, kelas_id, tahun_lulus, alamat, nilai_ujian) 
+                                VALUES (:user_id, :nama_lengkap, :nik, :sekolah_asal, :no_telp, :program_studi_id, :kelas_id, :tahun_lulus, :alamat, :nilai_ujian)");
+
+            $stmt->execute([
+                ':user_id' => $user_id,
+                ':nama_lengkap' => $nama_lengkap,
+                ':nik' => $nik,
+                ':sekolah_asal' => $sekolah_asal,
+                ':no_telp' => $no_telp,
+                ':program_studi_id' => $program_studi_id,
+                ':kelas_id' => $kelas_id,
+                ':tahun_lulus' => $tahun_lulus,
+                ':alamat' => $alamat,
+                ':nilai_ujian' => $nilai_ujian
+            ]);
+        }
+
+        // Notifikasi sukses dengan SweetAlert
+        echo "<script>
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Data successfully updated!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(function() {
+                    window.location = 'menu/tampil_data.php';  // Redirect ke halaman tampil_data.php
+                });
+              </script>";
+    } catch (PDOException $e) {
+        // Tangani error jika terjadi kesalahan pada query
+        echo "<script>
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Error updating data: " . $e->getMessage() . "',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+              </script>";
+    }
 }
-
-// Query untuk mengambil data mahasiswa dan status pendaftaran berdasarkan user_id
-$query = "
-    SELECT 
-        m.nama_lengkap, 
-        p.status AS status_pendaftaran
-    FROM mahasiswa m
-    JOIN pendaftaran p ON m.mahasiswa_id = p.mahasiswa_id
-    WHERE m.user_id = :user_id
-";
-
-$stmt = $pdo->prepare($query);
-$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-$stmt->execute();
-$data_mahasiswa = $stmt->fetchAll();
-
-// Jika ingin melanjutkan untuk pengguna non-admin
 ?>
+
 <!doctype html>
 <!--
 * Tabler - Premium and Open Source dashboard template with responsive and high quality UI.
@@ -56,7 +160,7 @@ $data_mahasiswa = $stmt->fetchAll();
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Dashboard - Status Pendaftaran.</title>
+    <title>Dashboard - Update Data.</title>
     <!-- CSS files -->
     <link href="../../assets/css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
@@ -74,14 +178,6 @@ $data_mahasiswa = $stmt->fetchAll();
       body {
       	font-feature-settings: "cv03", "cv04", "cv11";
       }
-          .hover-icon {
-        transition: transform 0.2s, color 0.2s; /* Efek transisi */
-    }
-
-    .hover-icon:hover {
-        transform: scale(1.2); /* Membesarkan ikon */
-        color: #0056b3; /* Mengubah warna saat hover */
-    }
 
       table {
       width: 100%;
@@ -300,7 +396,7 @@ $data_mahasiswa = $stmt->fetchAll();
                   </a>
                 </li>
                
-                <li class="nav-item active">
+                <li class="nav-item">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/status_pendaftaran_user.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
@@ -310,7 +406,7 @@ $data_mahasiswa = $stmt->fetchAll();
                     </span>
                   </a>
                 </li>
-                <li class="nav-item ">
+                <li class="nav-item">
                   <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/tanggal_daftar.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-week"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M8 14v4" /><path d="M12 14v4" /><path d="M16 14v4" /></svg>
@@ -322,8 +418,7 @@ $data_mahasiswa = $stmt->fetchAll();
                 </li>
 
                 
-                <li class="nav-item ">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" >
+                  <a class="nav-link" href="program_studi.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-school"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" /><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" /></svg>
                 </span>
@@ -333,13 +428,14 @@ $data_mahasiswa = $stmt->fetchAll();
                   </a>
                 </li>
 
-                <li class="nav-item ">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php" >
+                <li class="nav-item active">
+               
+                  <a class="nav-link " href="./form-elements.html" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Isi Biodata
+                     Update Biodata
                     </span>
                   </a>
                 </li>
@@ -363,7 +459,7 @@ $data_mahasiswa = $stmt->fetchAll();
                         <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/informasi_rekening.php">
                          Rekening Pembayaran
                         </a>
-                        <a class="dropdown-item" href="https://pdf.hana-ci.com/compress"target="_blank">
+                        <a class="dropdown-item" href="https://pdf.hana-ci.com/compress">
                           PDF Compress
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
@@ -399,10 +495,10 @@ $data_mahasiswa = $stmt->fetchAll();
             <div class="row g-2 align-items-center">
               <div class="col">
                 <!-- Page pre-title -->
-               
                 <h2 class="page-title">
-                 Status Pendaftaran <?php echo htmlspecialchars($user['username']); ?>
-                </h2>
+                 Update Biodata
+                                </h2>
+               
               </div>
               <!-- Page title actions -->
               <div class="col-auto ms-auto d-print-none">
@@ -417,37 +513,19 @@ $data_mahasiswa = $stmt->fetchAll();
         <!-- Page body -->
         <div class="page-body">
   <div class="container-xl">
-  <!-- Skeleton Loading -->
-  <!-- Skeleton Loading -->
+  <a href="#" class="btn btn-primary d-inline-block d-sm-inline-block ms-auto" data-bs-toggle="modal" data-bs-target="#modal-report">
+    <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 5l0 14" />
+        <path d="M5 12l14 0" />
+    </svg>
+    Update Biodata
+</a>
 
-<div id="skeleton-loader" class="skeleton-container">
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
+
 </div>
 
-<div class="table-responsive">
-    <table id="data-table" class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Nomor</th>
-                <th>Nama Mahasiswa</th>
-                <th>Status Pendaftaran</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-                foreach ($data_mahasiswa as $index => $row) {
-                    echo "<tr>
-                            <td>" . ($index + 1) . "</td>
-                            <td>{$row['nama_lengkap']}</td>
-                            <td>{$row['status_pendaftaran']}</td>
-                          </tr>";
-                }
-            ?>
-        </tbody>
-    </table>
-</div>
 
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
@@ -481,7 +559,131 @@ $data_mahasiswa = $stmt->fetchAll();
         </footer>
       </div>
     </div>
-   
+    
+
+    <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Data</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" class="form-control" name="nama_lengkap" placeholder="Masukkan Nama Lengkap Anda" value="<?= $mahasiswa['nama_lengkap'] ?? ''; ?>" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">NIK</label>
+            <input type="number" class="form-control" name="nik" placeholder="Masukkan NIK Anda" value="<?= $mahasiswa['nik'] ?? ''; ?>" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Asal Sekolah</label>
+            <input type="text" class="form-control" name="sekolah_asal" placeholder="Masukkan Asal Sekolah Anda" value="<?= $mahasiswa['sekolah_asal'] ?? ''; ?>" required>
+          </div>
+
+          <!-- Nilai Ujian -->
+          <div class="mb-3">
+            <label class="form-label">Nilai Ujian</label>
+            <input type="number" class="form-control" name="nilai_ujian" placeholder="Masukkan Nilai Ujian Anda" value="<?= $mahasiswa['nilai_ujian'] ?? ''; ?>" required>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-8">
+              <div class="mb-3">
+                <label class="form-label">Nomor Telp</label>
+                <input type="number" class="form-control ps-0" name="no_telp" value="<?= $mahasiswa['no_telp'] ?? ''; ?>" required>
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="mb-3">
+                <label class="form-label">Jurusan Pilihan</label>
+                <select class="form-select" name="program_studi" required>
+                  <option value="" selected>Pilih Jurusan</option>
+                  <?php foreach ($program_studi as $program) : ?>
+                    <option value="<?= $program['program_studi_id']; ?>" <?= ($program['program_studi_id'] == $mahasiswa['program_studi_id']) ? 'selected' : ''; ?>><?= $program['nama_program_studi']; ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="mb-3">
+                <label class="form-label">Biaya Pendaftaran</label>
+                <input type="text" class="form-control" value="1,500,000" readonly>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="mb-3">
+                <label class="form-label">Pilihan Kelas</label>
+                <select class="form-select" name="kelas" required>
+                  <option value="" selected>Pilih Kelas</option>
+                  <?php foreach ($kelas as $kelas_option) : ?>
+                    <option value="<?= $kelas_option['kelas_id']; ?>" <?= ($kelas_option['kelas_id'] == $mahasiswa['kelas_id']) ? 'selected' : ''; ?>><?= $kelas_option['nama_kelas']; ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="mb-3">
+                <label class="form-label" for="year" required>Tahun Lulus</label>
+                <select class="form-control" name="tahun_lulus" required>
+                  <option value="" disabled selected>Select Year</option>
+                  <?php
+                  for ($year = 2000; $year <= 2050; $year++) {
+                    echo "<option value='$year' " . (($year == $mahasiswa['tahun_lulus']) ? 'selected' : '') . ">$year</option>";
+                  }
+                  ?>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="mb-3">
+                <label class="form-label" for="file">Upload File</label>
+                <input type="file" class="form-control" name="file" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alamat: Textarea -->
+          <div class="mb-3">
+            <label class="form-label">Alamat</label>
+            <textarea class="form-control" name="alamat" rows="3" required><?= $mahasiswa['alamat'] ?? ''; ?></textarea>
+          </div>
+
+          <!-- Jenis Berkas: Pilihan hanya PDF -->
+          <div class="mb-3">
+            <label class="form-label">Jenis Berkas</label>
+            <select class="form-select" name="jenis_berkas" required>
+              <option value="PDF" selected>PDF</option> <!-- Hanya PDF yang tersedia -->
+            </select>
+          </div>
+
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
     <!-- Libs JS -->
     <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
     <script src="../../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>
@@ -509,59 +711,27 @@ $data_mahasiswa = $stmt->fetchAll();
             }
         });
     });
+  document.getElementById('submitButton').addEventListener('click', function (e) {
+    e.preventDefault(); // Mencegah pengiriman form langsung
 
-    let lastSortedColumn = -1; // Variabel untuk melacak kolom yang terakhir diurutkan
-    let sortOrder = 'desc'; // Urutan default adalah descending (terbesar ke terkecil)
-
-    // Fungsi untuk menampilkan data dan menghilangkan skeleton
-    window.onload = function () {
-      const skeletonLoader = document.getElementById('skeleton-loader');
-      const table = document.getElementById('data-table');
-
-      // Sembunyikan skeleton dan tampilkan tabel
-      skeletonLoader.style.display = 'none';
-      table.style.display = 'table';
-    };
-
-    function sortTable(columnIndex) {
-      const table = document.getElementById("data-table");
-      const tbody = table.tBodies[0];
-      const rows = Array.from(tbody.rows);
-
-      // Cek apakah kolom yang sama yang diklik sebelumnya
-      if (lastSortedColumn === columnIndex) {
-        sortOrder = (sortOrder === 'desc') ? 'asc' : 'desc'; // Toggle urutan
-      } else {
-        sortOrder = 'desc'; // Jika kolom berbeda, defaultkan ke descending
+    Swal.fire({
+      title: 'Konfirmasi',
+      text: 'Apakah Anda yakin ingin menyimpan data ini?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Simpan',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Arahkan ke tampil_data.php setelah submit
+       
       }
+    });
+  });
+    
 
-      // Mengurutkan berdasarkan kolom yang dipilih dari besar ke kecil atau kecil ke besar
-      rows.sort((a, b) => {
-        const aValue = a.cells[columnIndex].textContent.trim().toLowerCase();
-        const bValue = b.cells[columnIndex].textContent.trim().toLowerCase();
 
-        // Jika kolom angka, gunakan parseInt untuk konversi
-        if (!isNaN(aValue) && !isNaN(bValue)) {
-          return sortOrder === 'desc' 
-            ? parseInt(bValue, 10) - parseInt(aValue, 10) 
-            : parseInt(aValue, 10) - parseInt(bValue, 10);
-        }
-
-        // Jika kolom teks, gunakan string comparison
-        return sortOrder === 'desc' 
-          ? bValue.localeCompare(aValue) 
-          : aValue.localeCompare(bValue);
-      });
-
-      // Reorder rows dalam tabel
-      rows.forEach(row => tbody.appendChild(row));
-
-      // Melacak kolom yang terakhir diurutkan
-      lastSortedColumn = columnIndex;
-    }
-
-  
-</script>
-
-  </body>
-</html>
+   
+    </script>
+    </body>
+    </html>

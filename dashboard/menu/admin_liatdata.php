@@ -1,3 +1,45 @@
+<?php 
+session_start();
+include '../../koneksi.php'; // Menghubungkan ke database
+
+// Periksa apakah pengguna sudah login
+if (!isset($_SESSION['user'])) {
+    header("Location: ../../index.php");
+    exit;
+}
+
+
+
+$user = $_SESSION['user'];
+
+// Query untuk mendapatkan role pengguna
+$query = "SELECT role FROM users WHERE user_id = ?";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user['user_id']]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Cek jika role bukan admin
+if ($result['role'] !== 'admin') {
+    echo "<h1>Anda tidak memiliki akses ke menu admin</h1>";
+    exit;
+}
+
+// Query untuk mendapatkan seluruh data mahasiswa dan status pendaftaran
+$query = "SELECT m.*, 
+                 b.jenis_berkas, 
+                 b.file_path, 
+                 p.nama_program_studi, 
+                 k.nama_kelas, 
+                 d.status AS status_pendaftaran
+          FROM mahasiswa m
+          LEFT JOIN berkas b ON m.mahasiswa_id = b.mahasiswa_id
+          LEFT JOIN program_studi p ON m.program_studi_id = p.program_studi_id
+          LEFT JOIN kelas k ON m.kelas_id = k.kelas_id
+          LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id";
+$stmt = $pdo->prepare($query);
+$stmt->execute();
+$data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
 
 
 <!doctype html>
@@ -24,6 +66,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="../../assets/libs/sweetalert2/index.js"></script>
 
+  
     <style>
       @import url('https://rsms.me/inter/inter.css');
       :root {
@@ -32,6 +75,84 @@
       body {
       	font-feature-settings: "cv03", "cv04", "cv11";
       }
+          .hover-icon {
+        transition: transform 0.2s, color 0.2s; /* Efek transisi */
+    }
+
+    .hover-icon:hover {
+        transform: scale(1.2); /* Membesarkan ikon */
+        color: #0056b3; /* Mengubah warna saat hover */
+    }
+
+      table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      display: none; /* Sembunyikan tabel sampai data dimuat */
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+      position: relative;
+    }
+
+    .filter-icon {
+      font-size: 14px;
+      color: #007BFF;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .filter-icon:hover {
+      color: #0056b3;
+    }
+
+    /* CSS untuk Skeleton Loading */
+    .skeleton {
+      background-color: #e0e0e0;
+      height: 20px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+
+    .skeleton-text {
+      background-color: #e0e0e0;
+      height: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+
+    .skeleton-loading {
+      display: block;
+      animation: loading 2s infinite ease-in-out;
+    }
+
+    @keyframes loading {
+      0% {
+        background-color: #e0e0e0;
+      }
+      50% {
+        background-color: #f4f4f4;
+      }
+      100% {
+        background-color: #e0e0e0;
+      }
+    }
+
+    .skeleton-container {
+      display: flex;
+      flex-direction: column;
+    }
+
     </style>
   </head>
   <body >
@@ -182,7 +303,7 @@
                 </li>
                
                 <li class="nav-item">
-                  <a class="nav-link" href="#" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/approved_user.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
                 </span>
@@ -253,7 +374,65 @@
         <!-- Page body -->
         <div class="page-body">
   <div class="container-xl">
-  
+  <div id="skeleton-loader" class="skeleton-container">
+    <div class="skeleton skeleton-text skeleton-loading"></div>
+    <div class="skeleton skeleton-text skeleton-loading"></div>
+    <div class="skeleton skeleton-text skeleton-loading"></div>
+</div>
+
+<!-- Tabel Data -->
+<div class="table-responsive">
+    <table id="data-table" class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nomor</th>
+                <th>Nama Mahasiswa</th>
+                <th>NIK</th>
+                <th>Alamat</th>
+                <th>Sekolah Asal</th>
+                <th>Tahun Lulus</th>
+                <th>Biaya Pendaftaran</th>
+                <th>Program Studi Pilihan</th>
+                <th>Kelas Pilihan</th>
+                <th>Berkas Pendaftaran</th>
+                <th>Status Pendaftaran</th>
+                <th>Tanggal Pendaftaran</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+                foreach ($data_mahasiswa as $index => $row) {
+                    echo "<tr>
+                            <td>" . ($index + 1) . "</td>
+                            <td>{$row['nama_lengkap']}</td>
+                            <td>{$row['nik']}</td>
+                            <td>{$row['alamat']}</td>
+                            <td>{$row['sekolah_asal']}</td>
+                            <td>{$row['tahun_lulus']}</td>
+                            <td>Rp. " . number_format($row['biaya_pendaftaran'], 0, ',', '.') . "</td>
+                            <td>{$row['nama_program_studi']}</td>
+                            <td>{$row['nama_kelas']}</td>
+                            <td><a href='{$row['file_path']}' class='text-danger' target='_blank'>Lihat Berkas</a></td>
+                            <td>{$row['status_pendaftaran']}</td>
+                            <td>{$row['waktu_pendaftaran']}</td>
+                            <td>
+                                <a href='update_data.php' class='btn btn-info btn-sm' title='Edit'>
+                                    <i class='fas fa-edit'></i>
+                                </a>
+                                <a href='cetak_pdf.php?id={$row['mahasiswa_id']}' class='btn btn-success btn-sm' title='Cetak PDF'>
+                                    <i class='fas fa-file-pdf'></i>
+                                </a>
+                                <button class='btn btn-danger btn-sm' onclick='confirmDelete({$row['mahasiswa_id']})' title='Delete'>
+                                    <i class='fas fa-trash'></i>
+                                </button>
+                            </td>
+                        </tr>";
+                }
+            ?>
+        </tbody>
+    </table>
+</div>
   </div>
 </div>
 
@@ -402,22 +581,73 @@
 
     <script>
     document.getElementById('logoutLink').addEventListener('click', function (event) {
-    event.preventDefault(); // Mencegah aksi default tautan
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You will be logged out!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, logout!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Redirect ke script PHP untuk menghancurkan session
-            window.location.href = 'logout.php';
-        }
+        event.preventDefault(); // Mencegah aksi default tautan
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You will be logged out!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, logout!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect ke index.php
+                window.location.href = '../../index.php';
+            }
+        });
     });
-});
+
+    let lastSortedColumn = -1; // Variabel untuk melacak kolom yang terakhir diurutkan
+    let sortOrder = 'desc'; // Urutan default adalah descending (terbesar ke terkecil)
+
+    // Fungsi untuk menampilkan data dan menghilangkan skeleton
+    window.onload = function () {
+      const skeletonLoader = document.getElementById('skeleton-loader');
+      const table = document.getElementById('data-table');
+
+      // Sembunyikan skeleton dan tampilkan tabel
+      skeletonLoader.style.display = 'none';
+      table.style.display = 'table';
+    };
+
+    function sortTable(columnIndex) {
+      const table = document.getElementById("data-table");
+      const tbody = table.tBodies[0];
+      const rows = Array.from(tbody.rows);
+
+      // Cek apakah kolom yang sama yang diklik sebelumnya
+      if (lastSortedColumn === columnIndex) {
+        sortOrder = (sortOrder === 'desc') ? 'asc' : 'desc'; // Toggle urutan
+      } else {
+        sortOrder = 'desc'; // Jika kolom berbeda, defaultkan ke descending
+      }
+
+      // Mengurutkan berdasarkan kolom yang dipilih dari besar ke kecil atau kecil ke besar
+      rows.sort((a, b) => {
+        const aValue = a.cells[columnIndex].textContent.trim().toLowerCase();
+        const bValue = b.cells[columnIndex].textContent.trim().toLowerCase();
+
+        // Jika kolom angka, gunakan parseInt untuk konversi
+        if (!isNaN(aValue) && !isNaN(bValue)) {
+          return sortOrder === 'desc' 
+            ? parseInt(bValue, 10) - parseInt(aValue, 10) 
+            : parseInt(aValue, 10) - parseInt(bValue, 10);
+        }
+
+        // Jika kolom teks, gunakan string comparison
+        return sortOrder === 'desc' 
+          ? bValue.localeCompare(aValue) 
+          : aValue.localeCompare(bValue);
+      });
+
+      // Reorder rows dalam tabel
+      rows.forEach(row => tbody.appendChild(row));
+
+      // Melacak kolom yang terakhir diurutkan
+      lastSortedColumn = columnIndex;
+    }
+
 
 </script>
 

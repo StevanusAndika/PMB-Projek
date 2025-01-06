@@ -397,7 +397,7 @@ try {
                 <!-- Page pre-title -->
                
                 <h2 class="page-title">
-                 Daftar Program Studi  Universitas IPWIJA
+                 Daftar Program Studi Dan Informasi Biaya  Universitas IPWIJA
                 </h2>
               </div>
               <!-- Page title actions -->
@@ -420,40 +420,73 @@ try {
         <div class="skeleton skeleton-text skeleton-loading"></div>
       </div>
 
-      <!-- Tabel Data -->
       <table id="data-table">
-        <thead>
-          <tr>
-            <th>
-              ID
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
-            </th>
-            <th>
-              Nama Program Studi
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
-            </th>
-            <th>
-              Status Akreditasi
-              <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Akreditasi"></i>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (!empty($rows)): ?>
-            <?php foreach ($rows as $row): ?>
-              <tr>
-                <td><?= htmlspecialchars($row['program_studi_id']) ?></td>
-                <td><?= htmlspecialchars($row['nama_program_studi']) ?></td>
-                <td><?= htmlspecialchars($row['status_akreditasi']) ?></td>
-              </tr>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <tr>
-              <td colspan="3">Tidak ada data.</td>
-            </tr>
-          <?php endif; ?>
-        </tbody>
-      </table>
+  <thead>
+    <tr>
+      <th>
+        ID
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
+      </th>
+      <th>
+        Nama Program Studi
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
+      </th>
+      <th>
+        Status Akreditasi
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Akreditasi"></i>
+      </th>
+      <th>
+        Biaya Pendaftaran
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(3)" title="Urutkan Biaya Pendaftaran"></i>
+      </th>
+      <th>
+        Uang Gedung
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(4)" title="Urutkan Uang Gedung"></i>
+      </th>
+      <th>
+        Uang SPP Bulan Pertama
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(5)" title="Urutkan Uang SPP"></i>
+      </th>
+      <th>
+        Masa Studi
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(6)" title="Urutkan Masa Studi"></i>
+      </th>
+      <th>
+        Brosur
+        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(7)" title="BROSUR PMB"></i>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php
+    $programs = [
+        ["id" => 1, "name" => "S1 Rekayasa Perangkat Lunak", "status" => "Baik Sekali", "biaya" => "Rp. 600.000", "gedung" => "Rp. 6.000.000", "spp" => "Rp. 900.000", "masa" => "4 Tahun"],
+        ["id" => 2, "name" => "S1 Informatika", "status" => "Baik Sekali", "biaya" => "Rp. 600.000", "gedung" => "Rp. 6.000.000", "spp" => "Rp. 900.000", "masa" => "4 Tahun"],
+        ["id" => 3, "name" => "S1 Sistem Informasi", "status" => "Baik Sekali", "biaya" => "Rp. 600.000", "gedung" => "Rp. 6.000.000", "spp" => "Rp. 900.000", "masa" => "4 Tahun"],
+        ["id" => 4, "name" => "D3 Kebidanan", "status" => "Baik Sekali", "biaya" => "Rp. 2.100.000", "gedung" => "Rp. 6.000.000", "spp" => "Rp. 1.100.000", "masa" => "3 Tahun"],
+        ["id" => 5, "name" => "S1 Kewirausahaan", "status" => "Baik Sekali", "biaya" => "Rp. 600.000", "gedung" => "Rp. 6.000.000", "spp" => "Rp. 900.000", "masa" => "4 Tahun"],
+        ["id" => 6, "name" => "S2 Manajemen", "status" => "Baik Sekali", "biaya" => "Rp. 1.100.000", "gedung" => "Rp. 7.500.000", "spp" => "Rp. 1.250.000", "masa" => "2 Tahun"],
+        ["id" => 7, "name" => "S1 Manajemen", "status" => "Baik Sekali", "biaya" => "Rp. 600.000", "gedung" => "Rp. 6.000.000", "spp" => "Rp. 900.000", "masa" => "4 Tahun"],
+    ];
+
+    foreach ($programs as $program) {
+        echo "<tr>";
+        echo "<td>{$program['id']}</td>";
+        echo "<td>{$program['name']}</td>";
+        echo "<td>{$program['status']}</td>";
+        echo "<td>{$program['biaya']}</td>";
+        echo "<td>{$program['gedung']}</td>";
+        echo "<td>{$program['spp']}</td>";
+        echo "<td>{$program['masa']}</td>";
+        echo "<td><a href='../../assets/brosur/brosur.pdf' target='_blank'>Download Informasi Brosur PMB</a></td>";
+        echo "</tr>";
+    }
+    ?>
+  </tbody>
+</table>
+
+
+
     </div>
   </div>
       </div>

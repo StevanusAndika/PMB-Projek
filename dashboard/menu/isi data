@@ -11,7 +11,8 @@ mahasiswa_id Utama	int(11)			Tidak	Tidak ada		AUTO_INCREMENT	Ubah Ubah	Hapus Hap
 	10	program_studi_id Indeks	int(11)			Tidak	Tidak ada			Ubah Ubah	Hapus Hapus	
 	11	kelas_id Indeks	int(11)			Tidak	Tidak ada			Ubah Ubah	Hapus Hapus	
 	12	Nilai_ujian	int(50)			Tidak	Tidak ada			Ubah Ubah	Hapus Hapus	
-	13	waktu_pendaftaran	timestamp	
+	13	waktu_pendaftaran	timestamp			Tidak	current_timestamp()		ON UPDATE CURRENT_TIMESTAMP()	Ubah Ubah	Hapus Hapus	
+	14	Gelombang	varchar(10)
 
 
 
@@ -55,7 +56,10 @@ user_id Utama	int(11)			Tidak	Tidak ada		AUTO_INCREMENT	Ubah Ubah	Hapus Hapus
 	6	created_at	timestamp			Tidak	current_timestamp()			Ubah Ubah	Hapus Hapus	
 
 
-
+TABLE PENDAFTARAN:Nama	Jenis	Penyortiran	Atribut	Tak Ternilai	Bawaan	Komentar	Ekstra	Tindakan
+	1	pendaftaran_id Utama	int(11)			Tidak	Tidak ada		AUTO_INCREMENT	Ubah Ubah	Hapus Hapus	
+	2	mahasiswa_id Indeks	int(11)			Tidak	Tidak ada			Ubah Ubah	Hapus Hapus	
+	3	status	enum('menunggu disetujui', 'disetujui', 'pending')
 
 
 

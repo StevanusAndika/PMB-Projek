@@ -1,20 +1,33 @@
 <?php
 session_start();
+require_once '../koneksi.php';
 
-// Check if the user is logged in
+// Periksa apakah pengguna sudah login
 if (!isset($_SESSION['user'])) {
-  // Redirect to login if not logged in
-  header("Location: ../../index.php");
-  exit;
+    // Arahkan ke halaman login jika belum login
+    header("Location: ../../index.php");
+    exit;
 }
 
-// Retrieve user information from session
+// Ambil informasi pengguna dari sesi
 $user = $_SESSION['user'];
 
-// Check if the role is 'user'
+// Query untuk mendapatkan role dari tabel users
+$query = "SELECT role FROM users WHERE user_id = ?";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user['user_id']]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Periksa apakah role adalah admin
+if ($result['role'] !== 'admin') {
+    echo "<h1>Anda tidak memiliki akses ke menu ini</h1>";
+    exit;
+}
 
 
 ?>
+
+
 
 
 <!doctype html>
@@ -188,7 +201,7 @@ $user = $_SESSION['user'];
             <div class="container-xl">
               <ul class="navbar-nav">
                 <li class="nav-item active">
-                  <a class="nav-link" href="dashboard/admin.php" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/admin.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
                       <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
                     </span>
@@ -199,7 +212,7 @@ $user = $_SESSION['user'];
                 </li>
                
                 <li class="nav-item">
-                  <a class="nav-link" href="#" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/approved_user.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
                 </span>

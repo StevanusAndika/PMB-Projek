@@ -11,6 +11,18 @@ if (!isset($_SESSION['user'])) {
 
 // Ambil data user dari session
 $user = $_SESSION['user'];
+// Query untuk mendapatkan role dari tabel users
+$query = "SELECT role FROM users WHERE user_id = ?";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user['user_id']]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Periksa apakah role adalah admin
+if ($result['role'] !== 'pendaftar') {
+    echo "<h1>Anda tidak memiliki akses ke menu ini</h1>";
+    exit;
+}
+
 
 // Query untuk mendapatkan data lengkap dari database
 $stmt = $pdo->prepare("SELECT username, password, role, created_at FROM users WHERE email = :email");

@@ -9,6 +9,18 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
+// Query untuk mendapatkan role dari tabel users
+$query = "SELECT role FROM users WHERE user_id = ?";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user['user_id']]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Periksa apakah role adalah 
+if ($result['role'] !== 'pendaftar') {
+    echo "<h1>Anda tidak memiliki akses ke menu ini</h1>";
+    exit;
+}
+
 
 // Query untuk mendapatkan data mahasiswa dan status pendaftaran
 $query = "SELECT m.*, 
@@ -412,7 +424,6 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="skeleton skeleton-text skeleton-loading"></div>
 </div>
 
-<!-- Tabel Data -->
 <div class="table-responsive">
     <table id="data-table" class="table table-bordered">
         <thead>
@@ -433,38 +444,64 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tr>
         </thead>
         <tbody>
-            <?php
-                foreach ($data_mahasiswa as $index => $row) {
-                    echo "<tr>
-                            <td>" . ($index + 1) . "</td>
-                            <td>{$row['nama_lengkap']}</td>
-                            <td>{$row['nik']}</td>
-                            <td>{$row['alamat']}</td>
-                            <td>{$row['sekolah_asal']}</td>
-                            <td>{$row['tahun_lulus']}</td>
-                            <td>Rp. " . number_format($row['biaya_pendaftaran'], 0, ',', '.') . "</td>
-                            <td>{$row['nama_program_studi']}</td>
-                            <td>{$row['nama_kelas']}</td>
-                            <td><a href='{$row['file_path']}' class='text-danger' target='_blank'>Lihat Berkas</a></td>
-                            <td>{$row['status_pendaftaran']}</td>
-                            <td>{$row['waktu_pendaftaran']}</td>
-                            <td>
-                                <a href='update_data.php' class='btn btn-info btn-sm' title='Edit'>
-                                    <i class='fas fa-edit'></i>
+            <?php foreach ($data_mahasiswa as $index => $row): ?>
+                <tr>
+                    <td><?= $index + 1; ?></td>
+                    <td><?= htmlspecialchars($row['nama_lengkap']); ?></td>
+                    <td><?= htmlspecialchars($row['nik']); ?></td>
+                    <td><?= htmlspecialchars($row['alamat']); ?></td>
+                    <td><?= htmlspecialchars($row['sekolah_asal']); ?></td>
+                    <td><?= htmlspecialchars($row['tahun_lulus']); ?></td>
+                    <td>Rp. <?= number_format($row['biaya_pendaftaran'], 0, ',', '.'); ?></td>
+                    <td><?= htmlspecialchars($row['nama_program_studi']); ?></td>
+                    <td><?= htmlspecialchars($row['nama_kelas']); ?></td>
+                    <td>
+                        <a href="<?= htmlspecialchars($row['file_path']); ?>" class="text-danger" target="_blank">Lihat Berkas</a>
+                    </td>
+                    <td><?= htmlspecialchars($row['status_pendaftaran']); ?></td>
+                    <td><?= htmlspecialchars($row['waktu_pendaftaran']); ?></td>
+                    <td>
+                        <?php if ($row['status_pendaftaran'] === 'disetujui'): ?>
+                            <button class="btn btn-secondary btn-sm" title="Tidak Bisa Diedit" disabled>
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <div class="mt-2">
+                                <small class="text-danger">
+                                    Silahkan hubungi admin untuk melakukan pergantian data.
+                                </small>
+                                <a href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0" 
+                                   class="btn btn-success btn-sm mt-1" 
+                                   target="_blank">
+                                    Hubungi Admin
                                 </a>
-                                <a href='cetak_pdf.php?id={$row['mahasiswa_id']}' class='btn btn-success btn-sm' title='Cetak PDF'>
-                                    <i class='fas fa-file-pdf'></i>
-                                </a>
-                                <button class='btn btn-danger btn-sm' onclick='confirmDelete({$row['mahasiswa_id']})' title='Delete'>
-                                    <i class='fas fa-trash'></i>
-                                </button>
-                            </td>
-                        </tr>";
-                }
-            ?>
+                            </div>
+                            <script>
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Tidak Bisa Mengedit Data',
+                                    text: 'Anda sudah tidak bisa mengedit data, karena data sudah disetujui oleh admin.',
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            </script>
+                        <?php else: ?>
+                            <a href="update_data.php" class="btn btn-info btn-sm" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        <?php endif; ?>
+                        <a href="cetak_pdf.php?id=<?= $row['mahasiswa_id']; ?>" class="btn btn-success btn-sm" title="Cetak PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </a>
+                        <button class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $row['mahasiswa_id']; ?>)" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
         </tbody>
     </table>
 </div>
+
 
 
         <footer class="footer footer-transparent d-print-none">

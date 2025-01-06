@@ -1,8 +1,8 @@
 <?php 
 session_start();
-include '../../koneksi.php'; // Connect to the database
+include '../../koneksi.php'; // Koneksi ke database
 
-// Check if the user is logged in
+// Periksa apakah pengguna sudah login
 if (!isset($_SESSION['user'])) {
     header("Location: ../../index.php");
     exit;
@@ -10,32 +10,70 @@ if (!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 
-// Query to get student data and registration status
-$query = "SELECT m.*, 
-                 d.status AS status_pendaftaran,
-                 d.pendaftaran_id
-          FROM mahasiswa m
-          LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id
-          WHERE m.user_id = ?";
+// Query untuk mendapatkan role pengguna
+$query = "SELECT role FROM users WHERE user_id = ?";
 $stmt = $pdo->prepare($query);
 $stmt->execute([$user['user_id']]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Cek jika role bukan admin
+if ($result['role'] !== 'admin') {
+    echo "<h1>Anda tidak memiliki akses ke menu admin</h1>";
+    exit;
+}
+
+// Ambil data mahasiswa untuk admin
+$query = "SELECT m.nama_lengkap, 
+                 d.status AS status_pendaftaran,
+                 d.pendaftaran_id,
+                 m.mahasiswa_id
+          FROM mahasiswa m
+          LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id";
+$stmt = $pdo->prepare($query);
+$stmt->execute();
 $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Handle form submission for status update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran']) && isset($_POST['pendaftaran_id'])) {
+// Proses form untuk memperbarui status pendaftaran
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran']) && isset($_POST['mahasiswa_id'])) {
     $status_pendaftaran = $_POST['status_pendaftaran'];
-    $pendaftaran_id = $_POST['pendaftaran_id'];
+    $mahasiswa_id = $_POST['mahasiswa_id'];
 
-    // Update the status in the pendaftaran table
-    $updateQuery = "UPDATE pendaftaran SET status = ? WHERE pendaftaran_id = ?";
-    $updateStmt = $pdo->prepare($updateQuery);
-    $updateStmt->execute([$status_pendaftaran, $pendaftaran_id]);
+    // Query untuk memeriksa apakah mahasiswa_id sudah ada di tabel pendaftaran
+    $checkQuery = "SELECT * FROM pendaftaran WHERE mahasiswa_id = ?";
+    $checkStmt = $pdo->prepare($checkQuery);
+    $checkStmt->execute([$mahasiswa_id]);
+    $pendaftaranData = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
-    // Redirect to avoid form resubmission
+    if ($pendaftaranData) {
+        // Update status jika data sudah ada
+        $updateQuery = "UPDATE pendaftaran SET status = ? WHERE mahasiswa_id = ?";
+        $updateStmt = $pdo->prepare($updateQuery);
+        $updateStmt->execute([$status_pendaftaran, $mahasiswa_id]);
+    } else {
+        // Insert data baru jika belum ada
+        $insertQuery = "INSERT INTO pendaftaran (mahasiswa_id, status) VALUES (?, ?)";
+        $insertStmt = $pdo->prepare($insertQuery);
+        $insertStmt->execute([$mahasiswa_id, $status_pendaftaran]);
+    }
+
+    // Redirect untuk mencegah resubmission
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
 
+// Menangani jika modal dibuka untuk mendapatkan data mahasiswa berdasarkan mahasiswa_id
+if (isset($_GET['mahasiswa_id'])) {
+    $mahasiswa_id = $_GET['mahasiswa_id'];
+
+    // Query untuk mengambil data mahasiswa berdasarkan mahasiswa_id
+    $query = "SELECT m.mahasiswa_id, m.nama_lengkap, d.status AS status_pendaftaran
+              FROM mahasiswa m
+              LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id
+              WHERE m.mahasiswa_id = ?";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$mahasiswa_id]);
+    $data_mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
+}
 ?>
 <!doctype html>
 <!--
@@ -286,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'])
           <div class="navbar">
             <div class="container-xl">
               <ul class="navbar-nav">
-                <li class="nav-item active">
+                <li class="nav-item ">
                   <a class="nav-link" href="dashboard/admin.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
                       <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
@@ -297,7 +335,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'])
                   </a>
                 </li>
                
-                <li class="nav-item">
+                <li class="nav-item active">
                   <a class="nav-link" href="#" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
@@ -377,7 +415,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'])
     <div class="skeleton skeleton-text skeleton-loading"></div>
     <div class="skeleton skeleton-text skeleton-loading"></div>
 </div>
-
+<!-- Table Data -->
 <!-- Table Data -->
 <div class="table-responsive">
     <table id="data-table" class="table table-bordered">
@@ -399,6 +437,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'])
                             <td>
                                 <button class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#modal-report' 
                                 data-pendaftaran-id='{$row['pendaftaran_id']}' 
+                                data-mahasiswa-id='{$row['mahasiswa_id']}'
                                 data-status-pendaftaran='{$row['status_pendaftaran']}'>
                                     Ubah Status
                                 </button>
@@ -409,6 +448,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'])
         </tbody>
     </table>
 </div>
+
 
 <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
@@ -446,7 +486,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'])
     </div>
   </div>
 </div>
-
 
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
@@ -559,22 +598,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'])
       lastSortedColumn = columnIndex;
     }
 
-    // When the modal is triggered, populate it with the correct student data
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('modal-report');
-        modal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const pendaftaranId = button.getAttribute('data-pendaftaran-id');
-            const statusPendaftaran = button.getAttribute('data-status-pendaftaran');
-            const statusSelect = modal.querySelector('select[name="status_pendaftaran"]');
+   // Script to populate the modal fields dynamically
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = new bootstrap.Modal(document.getElementById('modal-report'));
+    var pendaftaranId = document.querySelectorAll('button[data-bs-target="#modal-report"]');
+    
+    pendaftaranId.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var mahasiswaId = this.getAttribute('data-mahasiswa-id');
+            var statusPendaftaran = this.getAttribute('data-status-pendaftaran');
 
-            modal.querySelector('input[name="pendaftaran_id"]').value = pendaftaranId;
-
-            // Set the current status as selected in the dropdown
-            statusSelect.value = statusPendaftaran;
+            document.getElementById('mahasiswa_id').value = mahasiswaId;
+            document.getElementById('nama_lengkap').value = this.getAttribute('data-nama-lengkap');
+            document.querySelector('select[name="status_pendaftaran"]').value = statusPendaftaran;
         });
     });
-
+});
 // Tangani klik tombol "Update"
 document.querySelector("button[type='submit']").addEventListener("click", function(event) {
     event.preventDefault(); // Mencegah form dikirimkan langsung

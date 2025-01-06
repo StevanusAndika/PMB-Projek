@@ -8,7 +8,17 @@ if (!isset($_SESSION['user'])) {
     header("Location: ../../index.php");
     exit;
 }
+// Query untuk mendapatkan role dari tabel users
+$query = "SELECT role FROM users WHERE user_id = ?";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user['user_id']]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Periksa apakah role adalah admin
+if ($result['role'] !== 'pendaftar') {
+    echo "<h1>Anda tidak memiliki akses ke menu ini</h1>";
+    exit;
+}
 
 try {
     // Query untuk mengambil data dari tabel tanggal_pendaftaran
@@ -22,6 +32,7 @@ try {
     die("Query Error: " . $e->getMessage());
 }
 ?>
+
 
 
 <!doctype html>
