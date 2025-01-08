@@ -1,149 +1,128 @@
 <?php
-
-
-// Menghubungkan ke database menggunakan PDO
 session_start();
 include '../../koneksi.php';
 
 // Pastikan user sudah login
 if (!isset($_SESSION['user'])) {
-    echo "User not logged in.";
+    header('Location: ../../login.php');
     exit;
 }
 
-$user = $_SESSION['user']; // Mengambil data user dari session
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
 
-// Ambil data program studi dan kelas dari database
+// Query untuk mendapatkan role pengguna
+$query = "SELECT role FROM users WHERE user_id = ?";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user['user_id']]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Cek jika role bukan admin
+if ($result['role'] !== 'pendaftar') {
+    echo "<h1>Anda tidak memiliki akses ke menu admin</h1>";
+    exit;
+}
+
+// Ambil data mahasiswa berdasarkan user_id
+$stmt_mahasiswa = $pdo->prepare("SELECT * FROM mahasiswa WHERE user_id = :user_id LIMIT 1");
+$stmt_mahasiswa->execute([':user_id' => $user_id]);
+$mahasiswa = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
+
+// Ambil data program studi dan kelas
 $stmt_program_studi = $pdo->query("SELECT * FROM program_studi");
 $program_studi = $stmt_program_studi->fetchAll(PDO::FETCH_ASSOC);
 
 $stmt_kelas = $pdo->query("SELECT * FROM kelas");
 $kelas = $stmt_kelas->fetchAll(PDO::FETCH_ASSOC);
 
-// Cek apakah ada ID mahasiswa yang dikirim untuk mengedit
-$mahasiswa_id = isset($_GET['mahasiswa_id']) ? $_GET['mahasiswa_id'] : null;
+// Ambil data berkas jika ada
+$stmt_berkas = $pdo->prepare("SELECT * FROM berkas WHERE mahasiswa_id = :mahasiswa_id");
+$stmt_berkas->execute([':mahasiswa_id' => $mahasiswa['mahasiswa_id']]);
+$berkas = $stmt_berkas->fetch(PDO::FETCH_ASSOC);
 
-// Ambil data mahasiswa jika ada ID
-if ($mahasiswa_id) {
-    $stmt_mahasiswa = $pdo->prepare("SELECT * FROM mahasiswa WHERE mahasiswa_id = :mahasiswa_id");
-    $stmt_mahasiswa->execute([':mahasiswa_id' => $mahasiswa_id]);
-    $mahasiswa = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
-}
-
-// Cek apakah form disubmit untuk insert atau update
+// Cek apakah form disubmit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        // Ambil data dari form
-        $nama_lengkap = $_POST['nama_lengkap'];
-        $nik = $_POST['nik'];
-        $sekolah_asal = $_POST['sekolah_asal'];
-        $no_telp = $_POST['no_telp'];
-        $program_studi_id = $_POST['program_studi'];
-        $kelas_id = $_POST['kelas'];
-        $tahun_lulus = $_POST['tahun_lulus'];
-        $alamat = $_POST['alamat'];
-        $gelombang_pendaftaran = $_POST['gelombang_pendaftaran'];
+    $nama_lengkap = $_POST['nama_lengkap'];
+    $nik = $_POST['nik'];
+    $alamat = $_POST['alamat'];
+    $sekolah_asal = $_POST['sekolah_asal'];
+    $tahun_lulus = $_POST['tahun_lulus'];
+    $no_telp = $_POST['no_telp'];
+    $program_studi_id = $_POST['program_studi'];
+    $kelas_id = $_POST['kelas'];
+    $gelombang = $_POST['gelombang'];
+
+    // Validasi dan unggah file
+    if (isset($_FILES['file']) && $_FILES['file']['size'] > 0) {
         $file = $_FILES['file'];
-
-        // Validasi NIK jika sudah ada (untuk update, kecuali NIK tetap sama)
-        if (!$mahasiswa_id) {
-            $stmt_check = $pdo->prepare("SELECT * FROM mahasiswa WHERE nik = :nik");
-            $stmt_check->execute([':nik' => $nik]);
-            if ($stmt_check->rowCount() > 0) {
-                echo "<script>Swal.fire('Error!', 'NIK sudah terdaftar!', 'error');</script>";
-                exit;
-            }
+        if ($file['size'] > 3145728) { // 3MB
+            echo "<script>alert('File size exceeds 3MB!');</script>";
+            exit;
         }
-
-        // Kalkulasi biaya pendaftaran berdasarkan program studi
-          // Kalkulasi biaya pendaftaran berdasarkan program studi
-          $biaya_pendaftaran = 0;
-          $biaya_gedung = 0;
-          $biaya_spp = 0;
-          if ($program_studi_id == 1) {
-              $biaya_pendaftaran = 1100000;
-              $biaya_gedung = 7500000;
-              $biaya_spp = 1250000;
-          } elseif ($program_studi_id == 2) {
-              $biaya_pendaftaran = 600000;
-              $biaya_gedung = 6000000;
-              $biaya_spp = 900000;
-          } elseif ($program_studi_id == 3) {
-              $biaya_pendaftaran = 2100000;
-              $biaya_gedung = 6000000;
-              $biaya_spp = 1100000;
-          }
-          $total_biaya = $biaya_pendaftaran + $biaya_gedung + $biaya_spp;
-  
-
-        // Validasi tahun lulus
-        // Validasi tahun lulus
-        if ($tahun_lulus < 2000 || $tahun_lulus > 2050) {
-          echo "<script>Swal.fire('Error!', 'Tahun lulus tidak valid!', 'error');</script>";
-          exit;
-      }
-
-        // Validasi dan upload file
-       // Validasi dan upload file
-       if ($file['size'] > 3145728) {
-        echo "<script>Swal.fire('Error!', 'File size exceeds 3MB!', 'error');</script>";
-        exit;
-    }
-    $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
-    if ($fileExtension !== 'pdf') {
-        echo "<script>Swal.fire('Error!', 'Only PDF files are allowed!', 'error');</script>";
-        exit;
-    }
-    $randomFileName = uniqid('file_', true) . '.' . $fileExtension;
-    $filePath = "../../uploads/" . $randomFileName;
-    if (!is_dir("../../uploads")) {
-        mkdir("../../uploads", 0777, true);
-    }
-    if (!move_uploaded_file($file['tmp_name'], $filePath)) {
-        echo "<script>Swal.fire('Error!', 'Failed to upload the file!', 'error');</script>";
-        exit;
-    }
-
-
-        // Mulai transaksi
-        $pdo->beginTransaction();
-
-        if ($mahasiswa_id) {
-            // Update data mahasiswa
-            $stmt_update_mahasiswa = $pdo->prepare("UPDATE mahasiswa SET nama_lengkap = :nama_lengkap, nik = :nik, sekolah_asal = :sekolah_asal, no_telp = :no_telp, 
-                                                    program_studi_id = :program_studi_id, kelas_id = :kelas_id, tahun_lulus = :tahun_lulus, biaya_pendaftaran = :biaya_pendaftaran, 
-                                                    alamat = :alamat, Gelombang = :gelombang_pendaftaran WHERE mahasiswa_id = :mahasiswa_id");
-            $stmt_update_mahasiswa->execute([
-                ':nama_lengkap' => $nama_lengkap,
-                ':nik' => $nik,
-                ':sekolah_asal' => $sekolah_asal,
-                ':no_telp' => $no_telp,
-                ':program_studi_id' => $program_studi_id,
-                ':kelas_id' => $kelas_id,
-                ':tahun_lulus' => $tahun_lulus,
-                ':biaya_pendaftaran' => $total_biaya,
-                ':alamat' => $alamat,
-                ':gelombang_pendaftaran' => $gelombang_pendaftaran,
-                ':mahasiswa_id' => $mahasiswa_id
-            ]);
-        } else {
-            // Insert data mahasiswa (existing code)
+        $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        if ($fileExtension !== 'pdf') {
+            echo "<script>alert('Only PDF files are allowed!');</script>";
+            exit;
         }
+        $randomFileName = uniqid('file_', true) . '.' . $fileExtension;
+        $filePath = "../../uploads/" . $randomFileName;
+        if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+            echo "<script>alert('Failed to upload the file!');</script>";
+            exit;
+        }
+        // Update atau simpan data file ke tabel berkas
+        $stmt_file = $pdo->prepare("REPLACE INTO berkas (mahasiswa_id, jenis_berkas, file_path, upload_time) 
+                                    VALUES (:mahasiswa_id, :jenis_berkas, :file_path, NOW())");
+        $stmt_file->execute([
+            ':mahasiswa_id' => $mahasiswa['mahasiswa_id'],
+            ':jenis_berkas' => $gelombang,
+            ':file_path' => $filePath
+        ]);
+    }
 
-        // Commit transaksi
-        $pdo->commit();
+    // Kalkulasi biaya pendaftaran
+    $biaya_pendaftaran = $program_studi_id == 1 ? 1100000 : 600000; // Sesuaikan logika sesuai kebutuhan
+    $biaya_gedung = $program_studi_id == 1 ? 7500000 : 6000000;
+    $biaya_spp = $program_studi_id == 1 ? 1250000 : 900000;
+    $total_biaya = $biaya_pendaftaran + $biaya_gedung + $biaya_spp;
 
-        // Redirect atau tampilkan hasil
+    // Update data mahasiswa
+    try {
+        $stmt_update = $pdo->prepare("UPDATE mahasiswa SET 
+                                        nama_lengkap = :nama_lengkap, 
+                                        nik = :nik, 
+                                        alamat = :alamat, 
+                                        sekolah_asal = :sekolah_asal, 
+                                        tahun_lulus = :tahun_lulus, 
+                                        no_telp = :no_telp, 
+                                        program_studi_id = :program_studi_id, 
+                                        kelas_id = :kelas_id,
+                                        Gelombang = :gelombang,
+                                        biaya_pendaftaran = :biaya_pendaftaran
+                                      WHERE user_id = :user_id");
+        $stmt_update->execute([
+            ':nama_lengkap' => $nama_lengkap,
+            ':nik' => $nik,
+            ':alamat' => $alamat,
+            ':sekolah_asal' => $sekolah_asal,
+            ':tahun_lulus' => $tahun_lulus,
+            ':no_telp' => $no_telp, // Menambahkan no_telp ke query
+            ':program_studi_id' => $program_studi_id,
+            ':kelas_id' => $kelas_id,
+            ':gelombang' => $gelombang,
+            ':biaya_pendaftaran' => $total_biaya,
+            ':user_id' => $user_id
+        ]);
+
+        echo "<script>alert('Data berhasil diperbarui!');</script>";
         header('Location: tampil_data.php');
         exit;
-
-    } catch (Exception $e) {
-        // Rollback transaksi jika ada kesalahan
-        $pdo->rollBack();
-        echo "<script>Swal.fire('Error!', 'Error inserting or updating data: " . $e->getMessage() . "', 'error');</script>";
+    } catch (PDOException $e) {
+        echo "<script>alert('Terjadi kesalahan: " . $e->getMessage() . "');</script>";
     }
 }
 ?>
+
 
 
 <!doctype html>
@@ -565,125 +544,143 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Isi Biodata</h5>
+        <h5 class="modal-title">Update Data <?= $mahasiswa['nama_lengkap'] ?? ''; ?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form method="POST" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label class="form-label">Nama Lengkap</label>
-            <input type="text" class="form-control" name="nama_lengkap" value="<?= $mahasiswa_id['nama_lengkap']; ?>" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">NIK</label>
-            <input type="number" class="form-control" name="nik" placeholder="Masukkan NIK Anda" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Asal Sekolah</label>
-            <input type="text" class="form-control" name="sekolah_asal" placeholder="Masukkan Asal Sekolah Anda" required>
-          </div>
+      <form method="POST" enctype="multipart/form-data">
+    <!-- Nama Lengkap -->
+    <div class="mb-3">
+        <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+        <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" 
+               value="<?= $mahasiswa['nama_lengkap'] ?? ''; ?>" required>
+    </div>
 
-          <div class="row">
-            <div class="col-lg-8">
-              <div class="mb-3">
-                <label class="form-label">Nomor Telp</label>
-                <div class="input-group input-group-flat">
-                  <span class="input-group-text">+62</span>
-                  <input type="number" class="form-control ps-0" name="no_telp" required>
-                </div>
-              </div>
+    <!-- NIK -->
+    <div class="mb-3">
+        <label for="nik" class="form-label">NIK</label>
+        <input type="text" class="form-control" id="nik" name="nik" 
+               value="<?= $mahasiswa['nik'] ?? ''; ?>" required>
+    </div>
+
+    <!-- Alamat -->
+    <div class="mb-3">
+        <label for="alamat" class="form-label">Alamat</label>
+        <textarea class="form-control" id="alamat" name="alamat" rows="3" required><?= $mahasiswa['alamat'] ?? ''; ?></textarea>
+    </div>
+
+    <!-- Sekolah Asal -->
+    <div class="mb-3">
+        <label for="sekolah_asal" class="form-label">Sekolah Asal</label>
+        <input type="text" class="form-control" id="sekolah_asal" name="sekolah_asal" 
+               value="<?= $mahasiswa['sekolah_asal'] ?? ''; ?>" required>
+    </div>
+
+    <!-- Tahun Lulus -->
+    <div class="mb-3">
+        <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
+        <select class="form-control" id="tahun_lulus" name="tahun_lulus" required>
+            <option value="">Pilih Tahun Lulus</option>
+            <?php for ($year = 2000; $year <= 2050; $year++): ?>
+                <option value="<?= $year; ?>" 
+                        <?= isset($mahasiswa['tahun_lulus']) && $mahasiswa['tahun_lulus'] == $year ? 'selected' : ''; ?>>
+                    <?= $year; ?>
+                </option>
+            <?php endfor; ?>
+        </select>
+    </div>
+
+   <!-- Program Studi -->
+<div class="mb-3">
+    <label for="program_studi" class="form-label">Program Studi</label>
+    <select class="form-control" id="program_studi" name="program_studi" required onchange="updateBiaya()">
+        <option value="">Pilih Program Studi</option>
+        <?php
+        // Daftar program studi
+        $program_studi = [
+            1 => "S1 Rekayasa Perangkat Lunak",
+            2 => " S1 Informatika",
+            3 => "S1 Sistem Informasi",
+            4 => "D3 Kebidanan",
+            5 => "S1 Kewirausahaan",
+            6 => "S2 Manajemen",
+            7 => "S1 Manajemen",
+            
+        ];
+
+        // Generate opsi dropdown
+        foreach ($program_studi as $id => $nama) {
+            $selected = isset($mahasiswa['program_studi_id']) && $mahasiswa['program_studi_id'] == $id ? 'selected' : '';
+            echo "<option value=\"$id\" $selected>$nama</option>";
+        }
+        ?>
+    </select>
+</div>
+
+
+    <!-- Kelas -->
+    <div class="mb-3">
+        <label for="kelas" class="form-label">Kelas</label>
+        <select class="form-control" id="kelas" name="kelas" required>
+            <option value="">Pilih Kelas</option>
+            <?php foreach ($kelas as $kls): ?>
+                <option value="<?= $kls['kelas_id']; ?>" 
+                        <?= isset($mahasiswa['kelas_id']) && $mahasiswa['kelas_id'] == $kls['kelas_id'] ? 'selected' : ''; ?>>
+                    <?= $kls['nama_kelas']; ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- Gelombang Pendaftaran -->
+    <div class="mb-3">
+        <label for="gelombang" class="form-label">Gelombang Pendaftaran</label>
+        <select class="form-control" id="gelombang" name="gelombang" required>
+            <option value="1" <?= isset($mahasiswa['gelombang']) && $mahasiswa['gelombang'] == '1' ? 'selected' : ''; ?>>Gelombang 1</option>
+            <option value="2" <?= isset($mahasiswa['gelombang']) && $mahasiswa['gelombang'] == '2' ? 'selected' : ''; ?>>Gelombang 2</option>
+            <option value="3" <?= isset($mahasiswa['gelombang']) && $mahasiswa['gelombang'] == '3' ? 'selected' : ''; ?>>Gelombang 3</option>
+        </select>
+    </div>
+
+    <!-- Biaya Pendaftaran -->
+    <div class="mb-3">
+        <label for="biaya_pendaftaran" class="form-label">Biaya Pendaftaran</label>
+        <input type="text" class="form-control" id="biaya_pendaftaran" name="biaya_pendaftaran" 
+               value="<?= number_format($mahasiswa['biaya_pendaftaran'] ?? 0, 0, ',', '.'); ?>" readonly>
+    </div>
+
+    <!-- File Sebelumnya -->
+    <div class="mb-3">
+        <label for="file_sebelumnya" class="form-label">File Sebelumnya</label>
+        <?php if (!empty($berkas)): ?>
+            <a href="<?= $berkas['file_path']; ?>" target="_blank">Lihat File</a>
+        <?php else: ?>
+            <p>Belum ada file yang diunggah.</p>
+        <?php endif; ?>
+    </div>
+
+    <!-- Upload File Baru -->
+    <div class="mb-3">
+        <label for="file" class="form-label">Upload File Baru</label>
+        <input type="file" class="form-control" id="file" name="file" accept=".pdf">
+        <small class="form-text text-muted">Hanya file PDF dengan ukuran maksimum 3MB yang diizinkan.</small>
+    </div>
+    <!-- Nomor Telepon -->
+<!-- Nomor Telepon -->
+<div class="mb-3">
+                <label for="no_telp" class="form-label">Nomor Telepon</label>
+                <input type="text" class="form-control" id="no_telp" name="no_telp" value="<?= $mahasiswa['no_telp'] ?? ''; ?>" required>
             </div>
-            <div class="col-lg-4">
-              <div class="mb-3">
-                <label class="form-label">Jurusan Pilihan</label>
-                <select class="form-select" name="program_studi" id="program_studi" required onchange="updateBiaya()">
-                  <option value="" selected>Pilih Jurusan</option>
-                  <?php foreach ($program_studi as $program) : ?>
-                    <option value="<?= $program['program_studi_id']; ?>"><?= $program['nama_program_studi']; ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-            </div>
-          </div>
 
-          <div class="row">
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label">Biaya Pendaftaran</label>
-                <input type="text" class="form-control" id="biaya_pendaftaran" value="0" readonly>
-              </div>
-            </div>
 
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label">Pilihan Kelas</label>
-                <select class="form-select" name="kelas" required>
-                  <option value="" selected>Pilih Kelas</option>
-                  <?php foreach ($kelas as $kelas_option) : ?>
-                    <option value="<?= $kelas_option['kelas_id']; ?>"><?= $kelas_option['nama_kelas']; ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="row">
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label" for="year" required>Tahun Lulus</label>
-                <select class="form-control" name="tahun_lulus" required>
-                  <option value="" disabled selected>Select Year</option>
-                  <?php
-                  for ($year = 2000; $year <= 2050; $year++) {
-                    echo "<option value='$year'>$year</option>";
-                  }
-                  ?>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-lg-6">
-              <div class="mb-3">
-                <label class="form-label" for="file">Upload File</label>
-                <input type="file" class="form-control" name="file" accept="application/pdf" required>
-                <div class="form-text text-danger">
-                  Berkas yang diupload: hanya file PDF (ijazah/SKL, kartu keluarga, foto, dan bukti pembayaran) dengan ukuran maksimal 3MB.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="mb-3">
-            <label class="form-label">Alamat</label>
-            <textarea class="form-control" name="alamat" placeholder="Masukkan Alamat Anda" rows="3" required></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Gelombang Pendaftaran</label>
-            <select class="form-select" name="gelombang_pendaftaran" required>
-              <option value="1">Gelombang 1</option>
-              <option value="2">Gelombang 2</option>
-              <option value="2">Gelombang 3</option>
-            </select>
-          </div>
-
-          <div class="text-end">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
+    <!-- Tombol Simpan -->
+    <button type="submit" class="btn btn-primary" id="submitButton">Simpan</button>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
+</form>
       </div>
     </div>
   </div>
 </div>
-
-
-
-
 
 
 
@@ -697,6 +694,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="../../assets/js/demo.min.js?1692870487" defer></script>
 
     <script>
+
+
+function updateBiaya() {
+    var programStudi = document.getElementById("program_studi").value;
+    var biayaPendaftaran = 0;
+    var biayaGedung = 0;
+    var biayaSPP = 0;
+
+    // Kondisi untuk setiap program studi
+    if (programStudi == 1) { // S2 Manajemen
+        biayaPendaftaran = 1100000;
+        biayaGedung = 7500000;
+        biayaSPP = 1250000;
+    } else if (programStudi == 2) { // S1 Manajemen
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
+    } else if (programStudi == 3) { // S1 Kewirausahaan
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
+    } else if (programStudi == 4) { // S1 Kewirausahaan
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
+    } else if (programStudi == 5) { // S1 Informatika
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
+    } else if (programStudi == 6) { // S1 Sistem Informasi
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
+    } else if (programStudi == 7) { // D3 Kebidanan
+        biayaPendaftaran = 2100000;
+        biayaGedung = 6000000;
+        biayaSPP = 1100000;
+    } else { // Jika tidak ada jurusan yang dipilih
+        biayaPendaftaran = 0;
+        biayaGedung = 0;
+        biayaSPP = 0;
+    }
+
+    // Kalkulasi total biaya
+    var totalBiaya = biayaPendaftaran + biayaGedung + biayaSPP;
+    document.getElementById("biaya_pendaftaran").value = totalBiaya.toLocaleString();
+}
+
+
+
     document.getElementById('logoutLink').addEventListener('click', function (event) {
         event.preventDefault(); // Mencegah aksi default tautan
         Swal.fire({
@@ -714,23 +761,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
     });
-  document.getElementById('submitButton').addEventListener('click', function (e) {
-    e.preventDefault(); // Mencegah pengiriman form langsung
+    document.addEventListener("DOMContentLoaded", function() {
+    // Ambil tombol submit form
+    const submitButton = document.querySelector("button[type='submit']");
 
-    Swal.fire({
-      title: 'Konfirmasi',
-      text: 'Apakah Anda yakin ingin menyimpan data ini?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Ya, Simpan',
-      cancelButtonText: 'Batal'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Arahkan ke tampil_data.php setelah submit
-       
-      }
+    // Event listener ketika tombol submit diklik
+    submitButton.addEventListener("click", function(event) {
+        event.preventDefault(); // Mencegah form agar tidak langsung disubmit
+
+        // Tampilkan pesan SweetAlert
+        Swal.fire({
+            title: 'Konfirmasi',
+            text: 'Apakah Anda yakin ingin mengirimkan data?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Kirim!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Jika pengguna mengklik 'Ya, Kirim!', form akan disubmit
+                Swal.fire('Data Terkirim!', 'Data Anda berhasil dikirim!', 'success').then(() => {
+                  // Redirect ke tampil_data.php setelah submit
+                 
+                    document.querySelector('form').submit(); 
+                    
+                    
+                });
+            } else {
+                // Jika pengguna mengklik 'Batal', tampilkan pesan batal
+                Swal.fire('Batal', 'Pengiriman data dibatalkan', 'error');
+            }
+        });
     });
-  });
+});
     
 
 

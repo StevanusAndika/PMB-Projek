@@ -8,8 +8,6 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
-
-
 $user = $_SESSION['user'];
 
 // Query untuk mendapatkan role pengguna
@@ -24,13 +22,15 @@ if ($result['role'] !== 'admin') {
     exit;
 }
 
-// Query untuk mendapatkan seluruh data mahasiswa dan status pendaftaran
+// Query untuk mendapatkan seluruh data mahasiswa termasuk gelombang dan nilai ujian
 $query = "SELECT m.*, 
                  b.jenis_berkas, 
                  b.file_path, 
                  p.nama_program_studi, 
                  k.nama_kelas, 
-                 d.status AS status_pendaftaran
+                 d.status AS status_pendaftaran, 
+                 m.nilai_ujian, 
+                 m.gelombang
           FROM mahasiswa m
           LEFT JOIN berkas b ON m.mahasiswa_id = b.mahasiswa_id
           LEFT JOIN program_studi p ON m.program_studi_id = p.program_studi_id
@@ -40,7 +40,6 @@ $stmt = $pdo->prepare($query);
 $stmt->execute();
 $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 
 <!doctype html>
 <!--
@@ -396,44 +395,46 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Kelas Pilihan</th>
                 <th>Berkas Pendaftaran</th>
                 <th>Status Pendaftaran</th>
+                <th>Nilai Ujian</th>
+                <th>Gelombang</th>
                 <th>Tanggal Pendaftaran</th>
                 <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
-            <?php
-                foreach ($data_mahasiswa as $index => $row) {
-                    echo "<tr>
-                            <td>" . ($index + 1) . "</td>
-                            <td>{$row['nama_lengkap']}</td>
-                            <td>{$row['nik']}</td>
-                            <td>{$row['alamat']}</td>
-                            <td>{$row['sekolah_asal']}</td>
-                            <td>{$row['tahun_lulus']}</td>
-                            <td>Rp. " . number_format($row['biaya_pendaftaran'], 0, ',', '.') . "</td>
-                            <td>{$row['nama_program_studi']}</td>
-                            <td>{$row['nama_kelas']}</td>
-                            <td><a href='{$row['file_path']}' class='text-danger' target='_blank'>Lihat Berkas</a></td>
-                            <td>{$row['status_pendaftaran']}</td>
-                            <td>{$row['waktu_pendaftaran']}</td>
-                            <td>
-                                <a href='update_data.php' class='btn btn-info btn-sm' title='Edit'>
-                                    <i class='fas fa-edit'></i>
-                                </a>
-                                <a href='cetak_pdf.php?id={$row['mahasiswa_id']}' class='btn btn-success btn-sm' title='Cetak PDF'>
-                                    <i class='fas fa-file-pdf'></i>
-                                </a>
-                                <button class='btn btn-danger btn-sm' onclick='confirmDelete({$row['mahasiswa_id']})' title='Delete'>
-                                    <i class='fas fa-trash'></i>
-                                </button>
-                            </td>
-                        </tr>";
-                }
-            ?>
-        </tbody>
+    <?php
+        foreach ($data_mahasiswa as $index => $row) {
+            echo "<tr>
+                    <td>" . ($index + 1) . "</td>
+                    <td>{$row['nama_lengkap']}</td>
+                    <td>{$row['nik']}</td>
+                    <td>{$row['alamat']}</td>
+                    <td>{$row['sekolah_asal']}</td>
+                    <td>{$row['tahun_lulus']}</td>
+                    <td>Rp. " . number_format($row['biaya_pendaftaran'], 0, ',', '.') . "</td>
+                    <td>{$row['nama_program_studi']}</td>
+                    <td>{$row['nama_kelas']}</td>
+                    <td><a href='{$row['file_path']}' class='text-danger' target='_blank'>Lihat Berkas</a></td>
+                    <td>{$row['status_pendaftaran']}</td>
+                    <td>{$row['nilai_ujian']}</td>
+                    <td>{$row['gelombang']}</td>
+                    <td>{$row['waktu_pendaftaran']}</td>
+                    <td>
+                        <a href='update_admin.php?id={$row['mahasiswa_id']}' class='btn btn-info btn-sm' title='Edit'>
+                            <i class='fas fa-edit'></i>
+                        </a>
+                        <a href='cetak_pdf_admin.php?id={$row['mahasiswa_id']}' class='btn btn-success btn-sm' title='Cetak PDF'>
+                            <i class='fas fa-file-pdf'></i>
+                        </a>
+                        <a href='delete_data_admin.php?id={$row['mahasiswa_id']}' class='btn btn-danger btn-sm btn-delete' title='Hapus' data-id='{$row['mahasiswa_id']}'>
+                            <i class='fas fa-trash'></i>
+                        </a>
+                    </td>
+                </tr>";
+        }
+    ?>
+</tbody>
     </table>
-</div>
-  </div>
 </div>
 
         <footer class="footer footer-transparent d-print-none">
@@ -571,13 +572,13 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
     </div>
     <!-- Libs JS -->
-    <script src="../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
-    <script src="../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>
-    <script src="../assets/libs/jsvectormap/dist/maps/world.js?1692870487" defer></script>
-    <script src="../assets/libs/jsvectormap/dist/maps/world-merc.js?1692870487" defer></script>
+    <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
+    <script src="../../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>
+    <script src="../../assets/libs/jsvectormap/dist/maps/world.js?1692870487" defer></script>
+    <script src="../../assets/libs/jsvectormap/dist/maps/world-merc.js?1692870487" defer></script>
     <!-- Tabler Core -->
-    <script src="../assets/js/tabler.min.js?1692870487" defer></script>
-    <script src="../assets/js/demo.min.js?1692870487" defer></script>
+    <script src="../../assets/js/tabler.min.js?1692870487" defer></script>
+    <script src="../../assets/js/demo.min.js?1692870487" defer></script>
 
     <script>
     document.getElementById('logoutLink').addEventListener('click', function (event) {
@@ -648,7 +649,48 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
       lastSortedColumn = columnIndex;
     }
 
+    function confirmDelete(mahasiswaId) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect to the delete URL with mahasiswa_id
+                window.location.href = 'delete_data.php?id=' + mahasiswaId;
+            }
+        });
+    }
 
+// Ambil semua elemen dengan class 'btn-delete'
+document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault(); // Cegah aksi default tombol
+
+            const url = this.getAttribute('href'); // URL penghapusan
+
+            // Tampilkan dialog konfirmasi SweetAlert2
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect ke URL penghapusan jika dikonfirmasi
+                    window.location.href = url;
+                }
+            });
+        });
+    });
 </script>
 
   </body>

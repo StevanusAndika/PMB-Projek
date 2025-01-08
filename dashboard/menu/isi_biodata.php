@@ -54,10 +54,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $biaya_gedung = 6000000;
             $biaya_spp = 900000;
         } elseif ($program_studi_id == 3) {
-            $biaya_pendaftaran = 2100000;
-            $biaya_gedung = 6000000;
-            $biaya_spp = 1100000;
+          $biayaPendaftaran = 600000;
+          $biayaGedung = 6000000;
+          $biayaSPP = 900000;
+        }else if($program_studi_id == 4){
+          $biayaPendaftaran = 600000;
+          $biayaGedung = 6000000;
+          $biayaSPP = 900000;
+        }else if($program_studi_id == 5){
+          $biayaPendaftaran = 600000;
+          $biayaGedung = 6000000;
+          $biayaSPP = 900000;
+        }else if($program_studi_id == 6){
+         $biayaPendaftaran = 600000;
+        $biayaGedung = 6000000;
+        $biayaSPP = 900000;
+        }else if($program_studi_id==7){
+          $biayaPendaftaran = 2100000;
+          $biayaGedung = 6000000;
+          $biayaSPP = 1100000;
+        }else{
+          $biayaPendaftaran = 0;
+          $biayaGedung = 0;
+         $biayaSPP = 0;
         }
+
+
         $total_biaya = $biaya_pendaftaran + $biaya_gedung + $biaya_spp;
 
         // Validasi tahun lulus
