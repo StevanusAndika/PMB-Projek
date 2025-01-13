@@ -82,8 +82,9 @@ if (!$data) {
             <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href=".">
-            <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+          <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+          <span>Universitas IPWIJA</span>
+
             </a>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
@@ -253,16 +254,64 @@ if (!$data) {
                   </a>
                 </li>
 
+
                 <li class="nav-item">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/langkah_bayar.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Isi Biodata
+                    Informasi Pembayaran
                     </span>
                   </a>
                 </li>
+
+                <li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <span class="nav-link-icon d-md-none d-lg-inline-block">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-check">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+        <path d="M9 15l2 2l4 -4"/>
+      </svg>
+    </span>
+    <span class="nav-link-title">
+      Biodata
+    </span>
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+    <!-- Menu Isi Data -->
+    <li>
+      <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php">
+        <span class="nav-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M12 8v4l2 2l4 -4l-4 -4l-2 2z"/>
+            <path d="M4 12h6l2 -2h6"/>
+          </svg>
+        </span>
+        Isi Data
+      </a>
+    </li>
+    <!-- Menu Tampil Data -->
+    <li>
+      <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/tampil_data.php">
+        <span class="nav-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+            <path d="M9 15l2 2l4 -4"/>
+          </svg>
+        </span>
+        Tampil Data
+      </a>
+    </li>
+  </ul>
+</li>
+
 
 
                 <li class="nav-item dropdown">

@@ -96,6 +96,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="mb-3 text-center mt-3">
                         <a href="reset_password.php">Lupa password?</a> | <a href="register.php">Registrasi</a>
                     </div>
+
+                     <!-- Link ke file PDF -->
+                     <div class="mb-3 text-center">
+                        <a href="assets/brosur/Pengisian%20Formulir.pdf" target="_blank" class="btn btn-link">
+                            Lihat Cara Pendaftaran
+                        </a>
+                    </div>
                 </div>
             </form>
         </div>

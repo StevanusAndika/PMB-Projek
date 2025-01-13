@@ -15,7 +15,17 @@ $user = $_SESSION['user'];
 // Query untuk mendapatkan data lengkap dari database
 
 
+// Query untuk mendapatkan role pengguna
+$query = "SELECT role FROM users WHERE user_id = ?";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user['user_id']]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Cek jika role bukan admin
+if ($result['role'] !== 'pendaftar') {
+    echo "<h1>Anda tidak memiliki akses ke menu pendaftar</h1>";
+    exit;
+}
 
 
 
@@ -372,81 +382,76 @@ $user = $_SESSION['user'];
         </div>
       </header>
       <div class="page-wrapper">
-        <!-- Page header -->
-        <div class="page-header d-print-none">
-          <div class="container-xl">
+    <!-- Page header -->
+    <div class="page-header d-print-none">
+        <div class="container-xl">
             <div class="row g-2 align-items-center">
-              <div class="col">
-                <!-- Page pre-title -->
-               
-                <h2 class="page-title">
-                 Informasi Rekening Pembayaran Universitas IPWIJA
-                </h2>
-              </div>
-              <!-- Page title actions -->
-              <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                 
-                  
+                <div class="col">
+                    <!-- Page pre-title -->
+                    <h2 class="page-title">
+                        Informasi Rekening Pembayaran Universitas IPWIJA
+                    </h2>
                 </div>
-              </div>
+                <!-- Page title actions -->
+                <div class="col-auto ms-auto d-print-none">
+                    <div class="btn-list"></div>
+                </div>
             </div>
-          </div>
         </div>
-        <!-- Page body -->
-        <div class="page-body">
-  <div class="container-xl">
-  <!-- Skeleton Loading -->
-  <div id="skeleton-loader" class="skeleton-container">
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-        <div class="skeleton skeleton-text skeleton-loading"></div>
-      </div>
-
-     <!-- Tabel Data -->
-<table id="data-table">
-  <thead>
-    <tr>
-      <th>
-        ID
-        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
-      </th>
-      <th>
-        Nomor Rekening
-        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nomor Rekening"></i>
-      </th>
-      <th>
-        Nama Bank
-        <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Nama Bank"></i>
-      </th>
-      <th>
-        Aksi
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1</td>
-      <td id="rekening-1">1234567890</td>
-      <td>Bank BJPS</td>
-      <td>
-        <i class="fas fa-copy action-icon" onclick="copyRekening('rekening-1')" title="Salin Nomor Rekening"></i>
-      </td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td id="rekening-2">9876543210</td>
-      <td>Bank Mandiri/Sevima Pay</td>
-      <td>
-        <i class="fas fa-copy action-icon" onclick="copyRekening('rekening-2')" title="Salin Nomor Rekening"></i>
-      </td>
-    </tr>
-  </tbody>
-</table>
     </div>
-  </div>
-      </div>
-</div>
+    <!-- Page body -->
+    <div class="page-body">
+        <div class="container-xl">
+            <!-- Skeleton Loading -->
+            <div id="skeleton-loader" class="skeleton-container">
+                <div class="skeleton skeleton-text skeleton-loading"></div>
+                <div class="skeleton skeleton-text skeleton-loading"></div>
+                <div class="skeleton skeleton-text skeleton-loading"></div>
+            </div>
+
+            <!-- Tabel Data -->
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            ID
+                            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
+                        </th>
+                        <th>
+                            Nomor Rekening
+                            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nomor Rekening"></i>
+                        </th>
+                        <th>
+                            Nama Bank
+                            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Nama Bank"></i>
+                        </th>
+                        <th>
+                            Aksi
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td id="rekening-1">1234567890</td>
+                        <td>Bank BJPS</td>
+                        <td>
+                            <i class="fas fa-copy action-icon" onclick="copyRekening('rekening-1')" title="Salin Nomor Rekening"></i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td id="rekening-2">9876543210</td>
+                        <td>Bank Mandiri/Sevima Pay</td>
+                        <td>
+                            <i class="fas fa-copy action-icon" onclick="copyRekening('rekening-2')" title="Salin Nomor Rekening"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Langkah-Langkah Pembayaran -->
+            
 
 
         <footer class="footer footer-transparent d-print-none">

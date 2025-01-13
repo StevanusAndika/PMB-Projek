@@ -1,14 +1,19 @@
-<?php 
+<?php
 session_start();
-include '../../koneksi.php'; // Koneksi ke database
+// Menghubungkan ke database menggunakan PDO
+include '../../koneksi.php';
 
-// Periksa apakah pengguna sudah login
-if (!isset($_SESSION['user'])) {
-    header("Location: ../../index.php");
-    exit;
+If (!isset($_SESSION['user'])) {
+  // Redirect to login if not logged in
+  header("Location: ../../index.php");
+  exit;
 }
 
+
+// Ambil data user dari session
 $user = $_SESSION['user'];
+// Query untuk mendapatkan data lengkap dari database
+
 
 // Query untuk mendapatkan role pengguna
 $query = "SELECT role FROM users WHERE user_id = ?";
@@ -17,64 +22,20 @@ $stmt->execute([$user['user_id']]);
 $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Cek jika role bukan admin
-if ($result['role'] !== 'admin') {
-    echo "<h1>Anda tidak memiliki akses ke menu admin</h1>";
+if ($result['role'] !== 'pendaftar') {
+    echo "<h1>Anda tidak memiliki akses ke menu pendaftar</h1>";
     exit;
 }
 
-// Ambil data mahasiswa untuk admin
-$query = "SELECT m.nama_lengkap, 
-                 d.status AS status_pendaftaran,
-                 d.pendaftaran_id,
-                 m.mahasiswa_id
-          FROM mahasiswa m
-          LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id";
-$stmt = $pdo->prepare($query);
-$stmt->execute();
-$data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Proses form untuk memperbarui status pendaftaran
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran']) && isset($_POST['mahasiswa_id'])) {
-    $status_pendaftaran = $_POST['status_pendaftaran'];
-    $mahasiswa_id = $_POST['mahasiswa_id'];
 
-    // Query untuk memeriksa apakah mahasiswa_id sudah ada di tabel pendaftaran
-    $checkQuery = "SELECT * FROM pendaftaran WHERE mahasiswa_id = ?";
-    $checkStmt = $pdo->prepare($checkQuery);
-    $checkStmt->execute([$mahasiswa_id]);
-    $pendaftaranData = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($pendaftaranData) {
-        // Update status jika data sudah ada
-        $updateQuery = "UPDATE pendaftaran SET status = ? WHERE mahasiswa_id = ?";
-        $updateStmt = $pdo->prepare($updateQuery);
-        $updateStmt->execute([$status_pendaftaran, $mahasiswa_id]);
-    } else {
-        // Insert data baru jika belum ada
-        $insertQuery = "INSERT INTO pendaftaran (mahasiswa_id, status) VALUES (?, ?)";
-        $insertStmt = $pdo->prepare($insertQuery);
-        $insertStmt->execute([$mahasiswa_id, $status_pendaftaran]);
-    }
 
-    // Redirect untuk mencegah resubmission
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
+   
 
-// Menangani jika modal dibuka untuk mendapatkan data mahasiswa berdasarkan mahasiswa_id
-if (isset($_GET['mahasiswa_id'])) {
-    $mahasiswa_id = $_GET['mahasiswa_id'];
-
-    // Query untuk mengambil data mahasiswa berdasarkan mahasiswa_id
-    $query = "SELECT m.mahasiswa_id, m.nama_lengkap, d.status AS status_pendaftaran
-              FROM mahasiswa m
-              LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id
-              WHERE m.mahasiswa_id = ?";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([$mahasiswa_id]);
-    $data_mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
-}
 ?>
+
+
 <!doctype html>
 <!--
 * Tabler - Premium and Open Source dashboard template with responsive and high quality UI.
@@ -89,7 +50,7 @@ if (isset($_GET['mahasiswa_id'])) {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Dashboard - Status Pendaftaran.</title>
+    <title>Dashboard - Program Studi.</title>
     <!-- CSS files -->
     <link href="../../assets/css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
@@ -107,14 +68,6 @@ if (isset($_GET['mahasiswa_id'])) {
       body {
       	font-feature-settings: "cv03", "cv04", "cv11";
       }
-          .hover-icon {
-        transition: transform 0.2s, color 0.2s; /* Efek transisi */
-    }
-
-    .hover-icon:hover {
-        transform: scale(1.2); /* Membesarkan ikon */
-        color: #0056b3; /* Mengubah warna saat hover */
-    }
 
       table {
       width: 100%;
@@ -191,15 +144,14 @@ if (isset($_GET['mahasiswa_id'])) {
     <script src="./dist/js/demo-theme.min.js?1692870487"></script>
     <div class="page">
       <!-- Navbar -->
-       <!-- Navbar -->
-       <header class="navbar navbar-expand-md d-print-none" >
+      <header class="navbar navbar-expand-md d-print-none" >
         <div class="container-xl">
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-           <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
-            <span>Universitas IPWIJA</span>
+             <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+          <span>Universitas IPWIJA</span>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
             <div class="nav-item d-none d-md-flex me-3">
@@ -298,16 +250,15 @@ if (isset($_GET['mahasiswa_id'])) {
             </div>
             <div class="nav-item dropdown">
               <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
-              <span class="avatar avatar-sm" style="background-image: url('dashboard/assets/avatars/000f.jpg')"></span>
-
-              <div class="d-none d-xl-block ps-2">
+                <span class="avatar avatar-sm" style="background-image: url(../static/avatars/000m.jpg)"></span>
+                <div class="d-none d-xl-block ps-2">
                   <div><?php echo htmlspecialchars($user['username']); ?></div>
                   <div class="mt-1 small text-secondary"><?php echo htmlspecialchars($user['email']); ?></div>
                 </div>
               </a>
               <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-              <a href="http://localhost/PMB-Projek/dashboard/menu/profile.php" class="dropdown-item">Profile</a>
-
+                <a href="http://localhost/PMB-Projek/dashboard/menu/profile_user.php" class="dropdown-item">Profile</a>
+                
                 
                 <div class="dropdown-divider"></div>
                 
@@ -325,7 +276,7 @@ if (isset($_GET['mahasiswa_id'])) {
             <div class="container-xl">
               <ul class="navbar-nav">
                 <li class="nav-item ">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/admin.php#" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/user.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
                       <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
                     </span>
@@ -335,43 +286,137 @@ if (isset($_GET['mahasiswa_id'])) {
                   </a>
                 </li>
                
-                <li class="nav-item active">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/approved_user.php" >
+                <li class="nav-item">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/status_pendaftaran_user.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checkbox"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l3 3l8 -8" /><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg>
                 </span>
                     <span class="nav-link-title">
-                      Setujui Data User
+                      Status Pendaftaran
                     </span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/admin_liatdata.php" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/tanggal_daftar.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg>
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-week"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M8 14v4" /><path d="M12 14v4" /><path d="M16 14v4" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Lihat Data User
+                     Jadwal Pendaftaran
                     </span>
                   </a>
                 </li>
 
                 
-                <li class="nav-item">
-                  <a class="nav-link" href="menu/profile.php" >
+                <li class="nav-item ">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-users"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-school"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" /><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Profil
+                      Program Studi
                     </span>
                   </a>
                 </li>
 
+                <li class="nav-item active">
+                  <a class="nav-link" href="langkah_bayar.php" >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
+                </span>
+                    <span class="nav-link-title">
+                    Informasi Pembayaran
+                    </span>
+                  </a>
+                </li>
+
+                <li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <span class="nav-link-icon d-md-none d-lg-inline-block">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-check">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+        <path d="M9 15l2 2l4 -4"/>
+      </svg>
+    </span>
+    <span class="nav-link-title">
+      Biodata
+    </span>
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+    <!-- Menu Isi Data -->
+    <li>
+      <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php">
+        <span class="nav-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M12 8v4l2 2l4 -4l-4 -4l-2 2z"/>
+            <path d="M4 12h6l2 -2h6"/>
+          </svg>
+        </span>
+        Isi Data
+      </a>
+    </li>
+    <!-- Menu Tampil Data -->
+    <li>
+      <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/tampil_data.php">
+        <span class="nav-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+            <path d="M9 15l2 2l4 -4"/>
+          </svg>
+        </span>
+        Tampil Data
+      </a>
+    </li>
+  </ul>
+</li>
+
                 
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/star -->
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" /></svg>
+                    </span>
+                    <span class="nav-link-title">
+                      Extra
+                    </span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <div class="dropdown-menu-columns">
+                      <div class="dropdown-menu-column">
+                        <a class="dropdown-item" href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0">
+                          WhatsApp PMB
+                        </a>
+                        <a class="dropdown-item" href="#">
+                         Rekening Pembayaran
+                        </a>
+                        <a class="dropdown-item" href="https://pdf.hana-ci.com/compress">
+                          PDF Compress
+                          <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
+                        </a>
+                        <a class="dropdown-item " href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
+                         Soal CBT
+                          <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
+                        </a>
+                        
+                        
 
-
-              
+                        
+                        
+                       
+                      </div>
+                      <div class="dropdown-menu-column">
+                       
+                          
+                      </div>
+                    </div>
+                  </div>
+                </li>
                 
                
                
@@ -383,108 +428,45 @@ if (isset($_GET['mahasiswa_id'])) {
         </div>
       </header>
       <div class="page-wrapper">
-        <!-- Page header -->
-        <div class="page-header d-print-none">
-          <div class="container-xl">
+    <div class="page-header d-print-none">
+        <div class="container-xl">
             <div class="row g-2 align-items-center">
-              <div class="col">
-                <!-- Page pre-title -->
-               
-                <h2 class="page-title">
-                 Status Pendaftaran Mahasiswa
-                </h2>
-              </div>
-              <!-- Page title actions -->
-              <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                 
-                  
+                <div class="col">
+                    <h2 class="page-title">
+                        Langkah-Langkah Pembayaran
+                    </h2>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-        <!-- Page body -->
-        <div class="page-body">
-  <div class="container-xl">
-  <!-- Skeleton Loading -->
-  <!-- Skeleton Loading -->
-
-<div id="skeleton-loader" class="skeleton-container">
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-</div>
-<!-- Table Data -->
-<!-- Table Data -->
-<div class="table-responsive">
-    <table id="data-table" class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Nomor</th>
-                <th>Nama Mahasiswa</th>
-                <th>Status Pendaftaran</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-                foreach ($data_mahasiswa as $index => $row) {
-                    echo "<tr>
-                            <td>" . ($index + 1) . "</td>
-                            <td>{$row['nama_lengkap']}</td>
-                            <td>{$row['status_pendaftaran']}</td>
-                            <td>
-                                <button class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#modal-report' 
-                                data-pendaftaran-id='{$row['pendaftaran_id']}' 
-                                data-mahasiswa-id='{$row['mahasiswa_id']}'
-                                data-status-pendaftaran='{$row['status_pendaftaran']}'>
-                                    Ubah Status
-                                </button>
-                            </td>
-                        </tr>";
-                }
-            ?>
-        </tbody>
-    </table>
-</div>
-
-
-<div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Ubah Status Pendaftar</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" enctype="multipart/form-data">
-          <!-- Hidden field for mahasiswa_id -->
-          <input type="hidden" name="mahasiswa_id" id="mahasiswa_id">
-
-          <div class="mb-3">
-            <label class="form-label">Nama Lengkap</label>
-            <!-- Set the nama_lengkap value dynamically from PHP -->
-            <input type="text" class="form-control" name="nama_lengkap" id="nama_lengkap" value="<?php echo htmlspecialchars($row['nama_lengkap']); ?>" readonly>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Status Pendaftaran</label>
-            <select class="form-select" name="status_pendaftaran" required>
-                <option value="menunggu disetujui">Menunggu Disetujui</option>
-                <option value="disetujui">Disetujui</option>
-                <option value="pending">Pending</option>
-            </select>
-          </div>
-
-          <div class="text-end">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
-            <button type="submit" class="btn btn-primary">Update</button>
-          </div>
-        </form>
-      </div>
     </div>
-  </div>
+    <div class="page-body">
+    <div class="container-xl">
+        <div class="payment-steps">
+            <p>
+                Informasi biaya per program studi dapat dilihat di menu 
+                <a href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" target="_blank">Program Studi</a>.
+            </p>
+
+           
+            <ol>
+                <li>
+                    Salin nomor rekening tujuan yang sesuai dengan bank yang Anda pilih dari tabel di halaman
+                    <a href="http://localhost/PMB-Projek/dashboard/menu/informasi_rekening.php" target="_blank">Informasi Rekening Pembayaran</a>.
+                </li>
+                <li>Buka aplikasi perbankan Anda (mobile banking, internet banking, atau ATM).</li>
+                <li>Pilih menu "Transfer" atau "Pembayaran" sesuai dengan fitur yang tersedia di bank Anda.</li>
+                <li>Masukkan nomor rekening tujuan yang telah Anda salin sebelumnya.</li>
+                <li>Masukkan jumlah pembayaran sesuai dengan tagihan atau instruksi dari Universitas IPWIJA.</li>
+                <li>Periksa kembali data transfer, termasuk nomor rekening dan jumlah yang akan ditransfer.</li>
+                <li>Konfirmasi transfer dan simpan bukti pembayaran untuk keperluan administrasi.</li>
+                <li>
+                    Upload bukti pembayaran melalui sistem yang telah disediakan pada saat pengisian identitas 
+                    (Berkas yang diupload: hanya file PDF (ijazah/SKL, kartu keluarga, foto, dan bukti pembayaran) 
+                    dengan ukuran maksimal 3MB.)
+                </li>
+            </ol>
+        </div>
+    </div>
 </div>
 
         <footer class="footer footer-transparent d-print-none">
@@ -519,7 +501,108 @@ if (isset($_GET['mahasiswa_id'])) {
         </footer>
       </div>
     </div>
-   
+    <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">New report</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-control" name="example-text-input" placeholder="Your report name">
+            </div>
+            <label class="form-label">Report type</label>
+            <div class="form-selectgroup-boxes row mb-3">
+              <div class="col-lg-6">
+                <label class="form-selectgroup-item">
+                  <input type="radio" name="report-type" value="1" class="form-selectgroup-input" checked>
+                  <span class="form-selectgroup-label d-flex align-items-center p-3">
+                    <span class="me-3">
+                      <span class="form-selectgroup-check"></span>
+                    </span>
+                    <span class="form-selectgroup-label-content">
+                      <span class="form-selectgroup-title strong mb-1">Simple</span>
+                      <span class="d-block text-secondary">Provide only basic data needed for the report</span>
+                    </span>
+                  </span>
+                </label>
+              </div>
+              <div class="col-lg-6">
+                <label class="form-selectgroup-item">
+                  <input type="radio" name="report-type" value="1" class="form-selectgroup-input">
+                  <span class="form-selectgroup-label d-flex align-items-center p-3">
+                    <span class="me-3">
+                      <span class="form-selectgroup-check"></span>
+                    </span>
+                    <span class="form-selectgroup-label-content">
+                      <span class="form-selectgroup-title strong mb-1">Advanced</span>
+                      <span class="d-block text-secondary">Insert charts and additional advanced analyses to be inserted in the report</span>
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-8">
+                <div class="mb-3">
+                  <label class="form-label">Report url</label>
+                  <div class="input-group input-group-flat">
+                    <span class="input-group-text">
+                      https://tabler.io/reports/
+                    </span>
+                    <input type="text" class="form-control ps-0"  value="report-01" autocomplete="off">
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-3">
+                  <label class="form-label">Visibility</label>
+                  <select class="form-select">
+                    <option value="1" selected>Private</option>
+                    <option value="2">Public</option>
+                    <option value="3">Hidden</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="mb-3">
+                  <label class="form-label">Client name</label>
+                  <input type="text" class="form-control">
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="mb-3">
+                  <label class="form-label">Reporting period</label>
+                  <input type="date" class="form-control">
+                </div>
+              </div>
+              <div class="col-lg-12">
+                <div>
+                  <label class="form-label">Additional information</label>
+                  <textarea class="form-control" rows="3"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+              Cancel
+            </a>
+            <a href="#" class="btn btn-primary ms-auto" data-bs-dismiss="modal">
+              <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+              Create new report
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Libs JS -->
     <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
     <script src="../../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>
@@ -598,54 +681,25 @@ if (isset($_GET['mahasiswa_id'])) {
       lastSortedColumn = columnIndex;
     }
 
-   // Script to populate the modal fields dynamically
-document.addEventListener('DOMContentLoaded', function () {
-    var modal = new bootstrap.Modal(document.getElementById('modal-report'));
-    var pendaftaranId = document.querySelectorAll('button[data-bs-target="#modal-report"]');
-    
-    pendaftaranId.forEach(function(button) {
-        button.addEventListener('click', function() {
-            var mahasiswaId = this.getAttribute('data-mahasiswa-id');
-            var statusPendaftaran = this.getAttribute('data-status-pendaftaran');
-
-            document.getElementById('mahasiswa_id').value = mahasiswaId;
-            document.getElementById('nama_lengkap').value = this.getAttribute('data-nama-lengkap');
-            document.querySelector('select[name="status_pendaftaran"]').value = statusPendaftaran;
-        });
+    // Fungsi untuk menyalin nomor rekening
+  function copyRekening(id) {
+    const rekening = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(rekening).then(() => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Nomor rekening berhasil disalin',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }).catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: 'Nomor rekening tidak dapat disalin',
+      });
     });
-});
-// Tangani klik tombol "Update"
-document.querySelector("button[type='submit']").addEventListener("click", function(event) {
-    event.preventDefault(); // Mencegah form dikirimkan langsung
-
-    // Menampilkan konfirmasi SweetAlert2
-    Swal.fire({
-      title: 'Apakah Anda yakin?',
-      text: 'Status pendaftaran akan diubah!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Ya, perbarui!',
-      cancelButtonText: 'Batal',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Jika dikonfirmasi, kirimkan form
-        const form = event.target.closest("form");
-        form.submit(); // Submit form
-
-        // Menampilkan pesan sukses setelah form disubmit
-        Swal.fire({
-          title: 'Sukses!',
-          text: 'Status pendaftaran berhasil diperbarui.',
-          icon: 'success',
-         
-          showConfirmButton: false,
-        }).then(() => {
-          // Mengalihkan ke halaman status_pendaftaran_user.php setelah pesan sukses
-          window.location.href = 'approved_user.php';
-        });
-      }
-    });
-  });
+  }
 </script>
 
   </body>

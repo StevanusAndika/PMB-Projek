@@ -321,15 +321,63 @@ try {
                 </li>
 
                 <li class="nav-item">
-                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php" >
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/langkah_bayar.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Isi Biodata
+                    Informasi Pembayaran
                     </span>
                   </a>
                 </li>
+
+
+                <li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <span class="nav-link-icon d-md-none d-lg-inline-block">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-check">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+        <path d="M9 15l2 2l4 -4"/>
+      </svg>
+    </span>
+    <span class="nav-link-title">
+      Biodata
+    </span>
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+    <!-- Menu Isi Data -->
+    <li>
+      <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php">
+        <span class="nav-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M12 8v4l2 2l4 -4l-4 -4l-2 2z"/>
+            <path d="M4 12h6l2 -2h6"/>
+          </svg>
+        </span>
+        Isi Data
+      </a>
+    </li>
+    <!-- Menu Tampil Data -->
+    <li>
+      <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/tampil_data.php">
+        <span class="nav-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+            <path d="M9 15l2 2l4 -4"/>
+          </svg>
+        </span>
+        Tampil Data
+      </a>
+    </li>
+  </ul>
+</li>
+
 
 
                 <li class="nav-item dropdown">
@@ -404,74 +452,174 @@ try {
         <!-- Page body -->
         <div class="page-body">
   <div class="container-xl">
-  <!-- Skeleton Loading -->
-  <!-- Skeleton Loading -->
+    <!-- Skeleton Loading -->
+    <div id="skeleton-loader" class="skeleton-container">
+      <div class="skeleton skeleton-text skeleton-loading"></div>
+      <div class="skeleton skeleton-text skeleton-loading"></div>
+      <div class="skeleton skeleton-text skeleton-loading"></div>
+    </div>
 
-<div id="skeleton-loader" class="skeleton-container">
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
+    <!-- Tabel Data -->
+    <table id="data-table" border="1">
+      <thead>
+        <tr>
+          <th>
+            Nomor
+            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
+          </th>
+          <th>
+            Gelombang
+            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Gelombang"></i>
+          </th>
+          <th>
+            Nama Kegiatan
+            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Nama"></i>
+          </th>
+          <th>
+            Tanggal Pendaftaran
+            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(3)" title="Urutkan Tanggal"></i>
+          </th>
+          <th>
+            Tanggal Berakhir
+            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(4)" title="Urutkan Tanggal"></i>
+          </th>
+          <th>
+            Keterangan
+            <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(5)" title="Urutkan Keterangan"></i>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data Gelombang 1 -->
+        <tr>
+          <td>1</td>
+          <td>1</td>
+          <td>Mempersiapkan Dokumen Yang Dibutuhkan</td>
+          <td>2024-12-16</td>
+          <td>2024-12-20</td>
+          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>1</td>
+          <td>Upload Berkas Dan Isi Biodata</td>
+          <td>2024-12-23</td>
+          <td>2025-01-01</td>
+          <td style="color: green;">Selesai</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>1</td>
+          <td>UJIAN CBT</td>
+          <td>2025-01-13</td>
+          <td>2025-02-24</td>
+          <td style="color: dark;">Belum Dimulai</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>1</td>
+          <td>Proses Seleksi Berkas</td>
+          <td>2025-02-05</td>
+          <td>2025-02-25</td>
+          <td style="color: dark;">Belum Dimulai</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>1</td>
+          <td>Pengumuman Seleksi</td>
+          <td>2025-02-25</td>
+          <td>2025-03-01</td>
+          <td style="color: dark;">Belum Dimulai</td>
+        </tr>
+
+        <!-- Data Gelombang 2 -->
+        <tr>
+          <td>6</td>
+          <td>2</td>
+          <td>Mempersiapkan Dokumen Yang Dibutuhkan</td>
+          <td>2024-10-02</td>
+          <td>2024-10-06</td>
+          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>2</td>
+          <td>Upload Berkas Dan Isi Biodata</td>
+          <td>2024-10-07</td>
+          <td>2024-10-16</td>
+          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>2</td>
+          <td>UJIAN CBT</td>
+          <td>2024-10-18</td>
+          <td>2024-11-30</td>
+          <td style="color: green;">Selesai</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>2</td>
+          <td>Proses Seleksi Berkas</td>
+          <td>2024-12-01</td>
+          <td>2024-12-15</td>
+          <td style="color: green;">Selesai</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>2</td>
+          <td>Pengumuman Seleksi</td>
+          <td>2024-12-16</td>
+          <td>2024-12-20</td>
+          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+        </tr>
+
+        <!-- Data Gelombang 3 -->
+        <tr>
+          <td>11</td>
+          <td>3</td>
+          <td>Mempersiapkan Dokumen Yang Dibutuhkan</td>
+          <td>2025-01-02</td>
+          <td>2025-01-06</td>
+          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>3</td>
+          <td>Upload Berkas Dan Isi Biodata</td>
+          <td>2025-01-07</td>
+          <td>2025-01-15</td>
+          <td style="color: green;">Selesai</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>3</td>
+          <td>UJIAN CBT</td>
+          <td>2025-01-17</td>
+          <td>2025-02-15</td>
+          <td style="color: dark;">Belum Dimulai</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>3</td>
+          <td>Proses Seleksi Berkas</td>
+          <td>2025-02-16</td>
+          <td>2025-02-28</td>
+          <td style="color: dark;">Belum Dimulai</td>
+        </tr>
+        <tr>
+          <td>15</td>
+          <td>3</td>
+          <td>Pengumuman Seleksi</td>
+          <td>2025-03-01</td>
+          <td>2025-03-05</td>
+          <td style="color: dark;">Belum Dimulai</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<!-- Tabel Data -->
-<table id="data-table">
-    <thead>
-        <tr>
-            <th>
-                Nomor
-                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(0)" title="Urutkan ID"></i>
-            </th>
-            <th>
-                Nama Kegiatan
-                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
-            </th>
-            <th>
-                Tanggal Pendaftaran
-                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
-            </th>
-            <th>
-                Tanggal Berakhir
-                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(1)" title="Urutkan Nama"></i>
-            </th>
-            <th>
-                Keterangan
-                <i class="fas fa-sort-amount-down-alt filter-icon" onclick="sortTable(2)" title="Urutkan Akreditasi"></i>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php
-        if ($rows) {
-            foreach ($rows as $index => $row) {
-                // Menentukan warna berdasarkan keterangan atau status
-                $color = "";
-                if ($row['keterangan'] == 'Berlangsung') {
-                    $color = "style='color: rgba(79, 123, 194);'"; // Warna merah untuk status Berlangsung
-                } elseif ($row['keterangan'] == 'Kadaluarsa') {
-                    $color = "style='color: rgba(217, 44, 28);'"; // Warna abu-abu untuk status Tutup
-                } elseif ($row['keterangan'] == 'Selesai') {
-                    $color = "style='color: green;'"; // Warna hijau untuk status Selesai
-                } elseif ($row['keterangan'] == 'Belum Dimulai') {
-                  $color = "style='color: Dark;'"; // Warna hijau untuk status Selesai
-              } else {
-                $color = "style='color: rgba(43, 41, 41);'"; // Warna hijau untuk status Selesai
-              }
-                
-
-                echo "<tr>";
-                echo "<td>" . $row['id_tanggal_daftar'] . "</td>";
-                echo "<td>" . $row['Nama_Kegiatan'] . "</td>";
-                echo "<td>" . $row['tanggal_daftar'] . "</td>";
-                echo "<td>" . $row['tanggaL_berakhir'] . "</td>";
-                echo "<td $color>" . $row['keterangan'] . "</td>";
-                echo "</tr>";
-            }
-        } else {
-            echo "<tr><td colspan='5'>Tidak ada data.</td></tr>";
-        }
-        ?>
-    </tbody>
-</table>
 
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
