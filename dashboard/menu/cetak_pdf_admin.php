@@ -17,16 +17,14 @@ if (!isset($_GET['id'])) {
 
 $mahasiswa_id = $_GET['id'];
 
-
-
-
 // Query untuk mendapatkan informasi mahasiswa dan gabungan tabel terkait
 $query = "
     SELECT 
         m.*,
         ps.nama_program_studi AS program_studi,
         k.nama_kelas AS kelas,
-        p.status AS status_pendaftaran
+        p.status AS status_pendaftaran,
+        p.keterangan
     FROM mahasiswa m
     LEFT JOIN program_studi ps ON m.program_studi_id = ps.program_studi_id
     LEFT JOIN kelas k ON m.kelas_id = k.kelas_id
@@ -74,14 +72,26 @@ $fields = [
     'Gelombang' => $data_mahasiswa['Gelombang'] ?: 'Tidak ada',
     'Nilai Ujian' => $data_mahasiswa['Nilai_ujian'],
     'Status Pendaftaran' => ucfirst($data_mahasiswa['status_pendaftaran']) ?: 'Tidak ada',
+    'Keterangan' => $data_mahasiswa['keterangan'] ?: 'Tidak ada', // Tambahkan keterangan
     'Waktu Pendaftaran' => $data_mahasiswa['waktu_pendaftaran'] ?: 'Tidak ada'
 ];
 
+// Lebar kolom
+$colWidthLabel = 70; // Lebar kolom label
+$colWidthValue = 120; // Lebar kolom nilai
+
 foreach ($fields as $label => $value) {
-    $pdf->Cell(50, 10, $label, 1); // Nama Field
-    $pdf->Cell(140, 10, $value, 1, 1); // Nilai Field
+    // Ubah tinggi baris agar sesuai dengan teks yang panjang
+    $lineHeight = 8; // Tinggi setiap baris
+    
+    // Tulis kolom label
+    $pdf->Cell($colWidthLabel, $lineHeight, $label, 1); 
+    
+    // Tulis kolom nilai dengan teks yang dibungkus otomatis
+    $pdf->MultiCell($colWidthValue, $lineHeight, $value, 1); 
 }
 
 // Output PDF
-$pdf->Output('D', 'cetak_data_calonmahasiswa.pdf'); // Mengunduh file
+$pdf->Output('D', 'data_mahasiswa.pdf'); // Mengunduh file
 ?>
+

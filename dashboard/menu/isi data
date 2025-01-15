@@ -59,7 +59,8 @@ user_id Utama	int(11)			Tidak	Tidak ada		AUTO_INCREMENT	Ubah Ubah	Hapus Hapus
 TABLE PENDAFTARAN:Nama	Jenis	Penyortiran	Atribut	Tak Ternilai	Bawaan	Komentar	Ekstra	Tindakan
 	1	pendaftaran_id Utama	int(11)			Tidak	Tidak ada		AUTO_INCREMENT	Ubah Ubah	Hapus Hapus	
 	2	mahasiswa_id Indeks	int(11)			Tidak	Tidak ada			Ubah Ubah	Hapus Hapus	
-	3	status	enum('menunggu disetujui', 'disetujui', 'pending')
+	3	status	enum('menunggu disetujui', 'disetujui', 'pending',...	utf8mb4_general_ci		Tidak	Tidak ada			Ubah Ubah	Hapus Hapus	
+	4	keterangan	text	utf8mb4_general_ci		Tidak	Tidak ada		
 
 
 

@@ -317,7 +317,7 @@ if ($result['role'] !== 'admin') {
 
       <!-- Card 3 -->
       <div class="col-sm-12 col-lg-6 mb-3">
-        <a href="#" class="card text-decoration-none">
+        <a href="http://localhost/PMB-Projek/dashboard/menu/approved_user.php" class="card text-decoration-none">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="subheader">Setujui Data User</div>

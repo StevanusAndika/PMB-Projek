@@ -80,12 +80,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
     }
 
-    // Kalkulasi biaya pendaftaran
-    $biaya_pendaftaran = $program_studi_id == 1 ? 1100000 : 600000; // Sesuaikan logika sesuai kebutuhan
-    $biaya_gedung = $program_studi_id == 1 ? 7500000 : 6000000;
-    $biaya_spp = $program_studi_id == 1 ? 1250000 : 900000;
-    $total_biaya = $biaya_pendaftaran + $biaya_gedung + $biaya_spp;
-
+    
+    
+      // Kalkulasi biaya pendaftaran berdasarkan program studi
+      $biaya_pendaftaran = 0;
+      $biaya_gedung = 0;
+      $biaya_spp = 0;
+  
+      switch ($program_studi_id) {
+          case 1: case 2: case 3: case 5: case 7: // S1 Program Studi
+              $biaya_pendaftaran = 600000;
+              $biaya_gedung = 6000000;
+              $biaya_spp = 900000;
+              break;
+          case 4: // D3 Kebidanan
+              $biaya_pendaftaran = 2100000;
+              $biaya_gedung = 6000000;
+              $biaya_spp = 1100000;
+              break;
+          case 6: // S2 Manajemen
+              $biaya_pendaftaran = 1100000;
+              $biaya_gedung = 7500000;
+              $biaya_spp = 1250000;
+              break;
+          default:
+              break;
+      }
+  
+      $total_biaya = $biaya_pendaftaran + $biaya_gedung + $biaya_spp;
+    
+    
     // Update data mahasiswa
     try {
         $stmt_update = $pdo->prepare("UPDATE mahasiswa SET 
@@ -695,7 +719,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
 
-
 function updateBiaya() {
     var programStudi = document.getElementById("program_studi").value;
     var biayaPendaftaran = 0;
@@ -703,34 +726,34 @@ function updateBiaya() {
     var biayaSPP = 0;
 
     // Kondisi untuk setiap program studi
-    if (programStudi == 1) { // S2 Manajemen
-        biayaPendaftaran = 1100000;
-        biayaGedung = 7500000;
-        biayaSPP = 1250000;
-    } else if (programStudi == 2) { // S1 Manajemen
+    if (programStudi == 1) { //S1 Rekayasa Perangkat Lunak
         biayaPendaftaran = 600000;
         biayaGedung = 6000000;
         biayaSPP = 900000;
-    } else if (programStudi == 3) { // S1 Kewirausahaan
+    } else if (programStudi == 2) { //S1 INFORMATIKA
         biayaPendaftaran = 600000;
         biayaGedung = 6000000;
         biayaSPP = 900000;
-    } else if (programStudi == 4) { // S1 Kewirausahaan
+    } else if (programStudi == 3) { // S1 SISTEM INFORMASI
         biayaPendaftaran = 600000;
         biayaGedung = 6000000;
         biayaSPP = 900000;
-    } else if (programStudi == 5) { // S1 Informatika
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else if (programStudi == 6) { // S1 Sistem Informasi
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else if (programStudi == 7) { // D3 Kebidanan
+    } else if (programStudi == 4) { //D3 KEBIDANAN
         biayaPendaftaran = 2100000;
         biayaGedung = 6000000;
         biayaSPP = 1100000;
+    } else if (programStudi == 5) { // S1 KEWIRAUSAHAAN
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
+    } else if (programStudi == 6) { // S2 MANAJEMEN
+      biayaPendaftaran = 1100000;
+        biayaGedung = 7500000;
+        biayaSPP = 1250000;
+    } else if (programStudi == 7) { // S1  MANAJEMEN
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
     } else { // Jika tidak ada jurusan yang dipilih
         biayaPendaftaran = 0;
         biayaGedung = 0;
@@ -743,24 +766,6 @@ function updateBiaya() {
 }
 
 
-
-    document.getElementById('logoutLink').addEventListener('click', function (event) {
-        event.preventDefault(); // Mencegah aksi default tautan
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You will be logged out!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, logout!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect ke index.php
-                window.location.href = '../../index.php';
-            }
-        });
-    });
     document.addEventListener("DOMContentLoaded", function() {
     // Ambil tombol submit form
     const submitButton = document.querySelector("button[type='submit']");

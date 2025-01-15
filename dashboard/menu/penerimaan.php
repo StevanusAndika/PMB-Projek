@@ -2,134 +2,73 @@
 session_start();
 include '../../koneksi.php';
 
-// Pastikan user sudah login
+// Cek login
 if (!isset($_SESSION['user'])) {
-    header('Location: ../../login.php');
+    header("Location: ../../index.php");
     exit;
 }
 
 $user = $_SESSION['user'];
 
-// Query untuk mendapatkan role pengguna
-$query = "SELECT role FROM users WHERE user_id = ?";
+// Query untuk mendapatkan data lengkap mahasiswa berdasarkan user
+$query = "
+    SELECT m.nama_lengkap, 
+           m.nik, 
+           m.alamat, 
+           m.no_telp, 
+           p.nama_program_studi, 
+           k.nama_kelas, 
+           d.status
+    FROM mahasiswa m
+    JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id
+    JOIN program_studi p ON m.program_studi_id = p.program_studi_id
+    JOIN kelas k ON m.kelas_id = k.kelas_id
+    WHERE m.user_id = ?
+";
 $stmt = $pdo->prepare($query);
 $stmt->execute([$user['user_id']]);
-$result = $stmt->fetch(PDO::FETCH_ASSOC);
+$data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Cek jika role bukan admin
-if ($result['role'] !== 'admin') {
-    echo "<h1>Anda tidak memiliki akses ke menu admin</h1>";
+// Jika data tidak ditemukan
+if (!$data) {
+    echo "<h1>Data tidak ditemukan</h1>";
     exit;
 }
 
-// Mendapatkan ID mahasiswa dari URL
-if (!isset($_GET['id'])) {
-    echo "<h1>ID mahasiswa tidak ditemukan!</h1>";
-    exit;
-}
-$mahasiswa_id = $_GET['id'];
+// Pesan dinamis berdasarkan status pendaftaran
+$status = $data['status'];
+$nama = htmlspecialchars($data['nama_lengkap']);
+$prodi = htmlspecialchars($data['nama_program_studi']);
+$kelas = htmlspecialchars($data['nama_kelas']);
 
-$stmt_mahasiswa = $pdo->prepare("SELECT * FROM mahasiswa WHERE mahasiswa_id = ?");
-$stmt_mahasiswa->execute([$mahasiswa_id]);
-$mahasiswa = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
-
-if (!$mahasiswa) {
-    echo "<h1>Data mahasiswa tidak ditemukan!</h1>";
-    exit;
-}
-
-// Ambil data program studi dan kelas
-$stmt_program_studi = $pdo->query("SELECT * FROM program_studi");
-$program_studi = $stmt_program_studi->fetchAll(PDO::FETCH_ASSOC);
-
-$stmt_kelas = $pdo->query("SELECT * FROM kelas");
-$kelas = $stmt_kelas->fetchAll(PDO::FETCH_ASSOC);
-
-// Cek apakah form disubmit
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama_lengkap = $_POST['nama_lengkap'];
-    $nik = $_POST['nik'];
-    $alamat = $_POST['alamat'];
-    $sekolah_asal = $_POST['sekolah_asal'];
-    $tahun_lulus = $_POST['tahun_lulus'];
-    $no_telp = $_POST['no_telp'];
-    $program_studi_id = $_POST['program_studi'];
-    $kelas_id = $_POST['kelas'];
-    $gelombang = $_POST['gelombang'];
-    $nilai_ujian = $_POST['nilai_ujian'];
-
-    // Kalkulasi biaya pendaftaran berdasarkan program studi
-    $biaya_pendaftaran = 0;
-    $biaya_gedung = 0;
-    $biaya_spp = 0;
-
-    switch ($program_studi_id) {
-        case 1: case 2: case 3: case 5: case 7: // S1 Program Studi
-            $biaya_pendaftaran = 600000;
-            $biaya_gedung = 6000000;
-            $biaya_spp = 900000;
-            break;
-        case 4: // D3 Kebidanan
-            $biaya_pendaftaran = 2100000;
-            $biaya_gedung = 6000000;
-            $biaya_spp = 1100000;
-            break;
-        case 6: // S2 Manajemen
-            $biaya_pendaftaran = 1100000;
-            $biaya_gedung = 7500000;
-            $biaya_spp = 1250000;
-            break;
-        default:
-            break;
-    }
-
-    $total_biaya = $biaya_pendaftaran + $biaya_gedung + $biaya_spp;
-
-    // Proses upload file
-    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-        $file_name = $_FILES['file']['name'];
-        $file_tmp = $_FILES['file']['tmp_name'];
-        $file_size = $_FILES['file']['size'];
-        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-        $allowed_ext = ['pdf'];
-
-        if (in_array($file_ext, $allowed_ext) && $file_size <= 3 * 1024 * 1024) {
-            $file_path = "../../uploads/" . uniqid() . ".$file_ext";
-            if (move_uploaded_file($file_tmp, $file_path)) {
-                $stmt_file = $file_data 
-                    ? $pdo->prepare("UPDATE berkas SET file_path = ?, upload_time = NOW() WHERE mahasiswa_id = ?")
-                    : $pdo->prepare("INSERT INTO berkas (mahasiswa_id, jenis_berkas, file_path, upload_time) VALUES (?, ?, ?, NOW())");
-                $stmt_file->execute($file_data 
-                    ? [$file_path, $mahasiswa_id] 
-                    : [$mahasiswa_id, 'Dokumen Pendaftaran', $file_path]);
-            }
-        } else {
-            echo "<script>alert('Hanya file PDF dengan ukuran maksimum 3MB yang diizinkan.');</script>";
-        }
-    }
-
-    // Update data mahasiswa
-    $stmt_update = $pdo->prepare("UPDATE mahasiswa SET 
-                                    nama_lengkap = ?, 
-                                    nik = ?, 
-                                    alamat = ?, 
-                                    sekolah_asal = ?, 
-                                    tahun_lulus = ?, 
-                                    no_telp = ?, 
-                                    program_studi_id = ?, 
-                                    kelas_id = ?, 
-                                    gelombang = ?, 
-                                    biaya_pendaftaran = ?, 
-                                    Nilai_ujian = ? 
-                                  WHERE mahasiswa_id = ?");
-    $stmt_update->execute([
-        $nama_lengkap, $nik, $alamat, $sekolah_asal, $tahun_lulus, $no_telp,
-        $program_studi_id, $kelas_id, $gelombang, $total_biaya, $nilai_ujian, $mahasiswa_id
-    ]);
-
-    echo "<script>alert('Data berhasil diperbarui!');</script>";
-    header("Location: admin_liatdata.php");
-    exit;
+if ($status === 'disetujui') {
+    $message = <<<HTML
+    <h2>Halo $nama 🎉</h2>
+    <p>Selamat Anda telah menjadi <strong>MAHASISWA IPWIJA</strong> Prodi <strong>$prodi</strong>.</p>
+    <p>Kelas pilihan Anda: <strong>$kelas</strong>.</p>
+    <p>Untuk informasi seputar daftar ulang dan perkuliahan, tim PMB akan segera menghubungi Anda.</p>
+    <p>Informasi lebih lanjut: <a href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0" target="_blank">Klik di sini</a></p>
+    HTML;
+} elseif ($status === 'menunggu disetujui') {
+    $message = <<<HTML
+    <h2>Halo $nama ⏳</h2>
+    <p>Pendaftaran Anda sedang dalam proses verifikasi. Mohon bersabar, tim PMB kami akan segera meninjau berkas Anda.</p>
+    <p>Informasi lebih lanjut: <a href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0" target="_blank">Klik di sini</a></p>
+    HTML;
+} elseif ($status === 'pending') {
+    $message = <<<HTML
+    <h2>Halo $nama ⚠️</h2>
+    <p>Pendaftaran Anda ditandai <strong>pending</strong> karena berkas Anda tidak lengkap. Silakan melengkapi berkas Anda segera.</p>
+    <p>Untuk Melengkapi Berkas Hubungi: <a href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0" target="_blank">Klik di sini</a></p>
+    HTML;
+} elseif ($status === 'ditolak') {
+    $message = <<<HTML
+    <h2>Halo $nama 😔</h2>
+    <p>Mohon maaf, pendaftaran Anda <strong>ditolak</strong> karena anda tidak melengkapi data dan belum membayar lunas biaya yang tertera . Silakan hubungi tim PMB untuk informasi lebih lanjut.</p>
+    <p>Informasi lebih lanjut: <a href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0" target="_blank">Klik di sini</a></p>
+    HTML;
+} else {
+    $message = "<h2>Status tidak diketahui</h2>";
 }
 ?>
 
@@ -149,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Dashboard - Update Data.</title>
+    <title>Dashboard - Program Studi.</title>
     <!-- CSS files -->
     <link href="../../assets/css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="../../assets/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
@@ -249,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-          <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
+             <img src="../../assets/img/logo.ico" width="150" height="50" alt="Tabler" class="navbar-brand-image">
           <span>Universitas IPWIJA</span>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
@@ -407,7 +346,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </li>
 
                 
-                  <a class="nav-link" href="program_studi.php" >
+                <li class="nav-item ">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-school"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" /><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" /></svg>
                 </span>
@@ -417,19 +357,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   </a>
                 </li>
 
-                <li class="nav-item active">
-               
-                  <a class="nav-link " href="./form-elements.html" >
+                <li class="nav-item ">
+                  <a class="nav-link" href="langkah_bayar.php" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 2l4 -4" /></svg>
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
                 </span>
                     <span class="nav-link-title">
-                     Update Biodata
+                    Informasi Pembayaran
                     </span>
                   </a>
                 </li>
 
+                <li class="nav-item active">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/penerimaan.php" >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
 
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M15 19l2 2l4 -4" /></svg>
+
+                </span>
+                    <span class="nav-link-title">
+                    Pengumuman Penerimaan
+                    </span>
+                  </a>
+                </li>
+
+                <li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <span class="nav-link-icon d-md-none d-lg-inline-block">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-check">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+        <path d="M9 15l2 2l4 -4"/>
+      </svg>
+    </span>
+    <span class="nav-link-title">
+      Biodata
+    </span>
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+    <!-- Menu Isi Data -->
+    <li>
+      <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/isi_biodata.php">
+        <span class="nav-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M12 8v4l2 2l4 -4l-4 -4l-2 2z"/>
+            <path d="M4 12h6l2 -2h6"/>
+          </svg>
+        </span>
+        Isi Data
+      </a>
+    </li>
+    <!-- Menu Tampil Data -->
+    <li>
+      <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/tampil_data.php">
+        <span class="nav-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+            <path d="M9 15l2 2l4 -4"/>
+          </svg>
+        </span>
+        Tampil Data
+      </a>
+    </li>
+  </ul>
+</li>
+
+                
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                     <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/star -->
@@ -445,17 +443,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <a class="dropdown-item" href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0">
                           WhatsApp PMB
                         </a>
-                        <a class="dropdown-item" href="http://localhost/PMB-Projek/dashboard/menu/informasi_rekening.php">
+                        <a class="dropdown-item" href="#">
                          Rekening Pembayaran
                         </a>
                         <a class="dropdown-item" href="https://pdf.hana-ci.com/compress">
                           PDF Compress
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
-                        <a class="dropdown-item" href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
+                        <a class="dropdown-item " href="https://docs.google.com/forms/d/e/1FAIpQLSdAAPNpGYhFLmWgozP6g9ek50Bz8eSpsLUIEejRJSUKyFY0pA/viewform" target="_blank">
                          Soal CBT
                           <span class="badge badge-sm bg-green-lt text-uppercase ms-auto">New</span>
                         </a>
+                        
+                        
+
                         
                         
                        
@@ -478,39 +479,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
       </header>
       <div class="page-wrapper">
-        <!-- Page header -->
-        <div class="page-header d-print-none">
-          <div class="container-xl">
-            <div class="row g-2 align-items-center">
-              <div class="col">
-                <!-- Page pre-title -->
+      <div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
                 <h2 class="page-title">
-                 Update Biodata
-                                </h2>
-               
-              </div>
-              <!-- Page title actions -->
-              <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                 
-                  
-                </div>
-              </div>
+                    Informasi Penerimaan Calon Mahasiswa
+                </h2>
             </div>
-          </div>
         </div>
-        <!-- Page body -->
-        <div class="page-body">
-  <div class="container-xl">
-  <a href="#" class="btn btn-primary d-inline-block d-sm-inline-block ms-auto" data-bs-toggle="modal" data-bs-target="#modal-report">
-    <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
-    Update Biodata
-</a>
-
-
+    </div>
+</div>
+<div class="page-body">
+    <div class="container-xl">
+        <div class="info_mahasiswa">
+            <?php echo $message; ?>
+        </div>
+    </div>
 </div>
 
+</div>
 
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
@@ -544,166 +532,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </footer>
       </div>
     </div>
-    
-
-    <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Update Data <?= $mahasiswa['nama_lengkap'] ?? ''; ?></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-      <form method="POST" enctype="multipart/form-data">
-    <!-- Nama Lengkap -->
-    <div class="mb-3">
-        <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
-        <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" 
-               value="<?= $mahasiswa['nama_lengkap'] ?? ''; ?>" required>
-    </div>
-
-    <!-- NIK -->
-    <div class="mb-3">
-        <label for="nik" class="form-label">NIK</label>
-        <input type="text" class="form-control" id="nik" name="nik" 
-               value="<?= $mahasiswa['nik'] ?? ''; ?>" required>
-    </div>
-
-    <!-- Alamat -->
-    <div class="mb-3">
-        <label for="alamat" class="form-label">Alamat</label>
-        <textarea class="form-control" id="alamat" name="alamat" rows="3" required><?= $mahasiswa['alamat'] ?? ''; ?></textarea>
-    </div>
-
-    <!-- Sekolah Asal -->
-    <div class="mb-3">
-        <label for="sekolah_asal" class="form-label">Sekolah Asal</label>
-        <input type="text" class="form-control" id="sekolah_asal" name="sekolah_asal" 
-               value="<?= $mahasiswa['sekolah_asal'] ?? ''; ?>" required>
-    </div>
-
-    <!-- Nilai Ujian -->
-    <div class="mb-3">
-        <label for="nilai_ujian" class="form-label">Nilai Ujian</label>
-        <input type="number" class="form-control" id="nilai_ujian" name="nilai_ujian" 
-               value="<?= $mahasiswa['Nilai_ujian'] ?? ''; ?>" required>
-    </div>
-
-    <!-- Tahun Lulus -->
-    <div class="mb-3">
-        <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
-        <select class="form-control" id="tahun_lulus" name="tahun_lulus" required>
-            <option value="">Pilih Tahun Lulus</option>
-            <?php for ($year = 2000; $year <= 2050; $year++): ?>
-                <option value="<?= $year; ?>" 
-                        <?= isset($mahasiswa['tahun_lulus']) && $mahasiswa['tahun_lulus'] == $year ? 'selected' : ''; ?>>
-                    <?= $year; ?>
-                </option>
-            <?php endfor; ?>
-        </select>
-    </div>
-
-   <!-- Program Studi -->
-<div class="mb-3">
-    <label for="program_studi" class="form-label">Program Studi</label>
-    <select class="form-control" id="program_studi" name="program_studi" required onchange="updateBiaya()">
-        <option value="">Pilih Program Studi</option>
-        <?php
-        // Daftar program studi
-        $program_studi = [
-            1 => "S1 Rekayasa Perangkat Lunak",
-            2 => " S1 Informatika",
-            3 => "S1 Sistem Informasi",
-            4 => "D3 Kebidanan",
-            5 => "S1 Kewirausahaan",
-            6 => "S2 Manajemen",
-            7 => "S1 Manajemen",
-            
-        ];
-
-        // Generate opsi dropdown
-        foreach ($program_studi as $id => $nama) {
-            $selected = isset($mahasiswa['program_studi_id']) && $mahasiswa['program_studi_id'] == $id ? 'selected' : '';
-            echo "<option value=\"$id\" $selected>$nama</option>";
-        }
-        ?>
-    </select>
-</div>
-
-
-    <!-- Kelas -->
-    <div class="mb-3">
-        <label for="kelas" class="form-label">Kelas</label>
-        <select class="form-control" id="kelas" name="kelas" required>
-            <option value="">Pilih Kelas</option>
-            <?php foreach ($kelas as $kls): ?>
-                <option value="<?= $kls['kelas_id']; ?>" 
-                        <?= isset($mahasiswa['kelas_id']) && $mahasiswa['kelas_id'] == $kls['kelas_id'] ? 'selected' : ''; ?>>
-                    <?= $kls['nama_kelas']; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-   <!-- Gelombang Pendaftaran -->
-<div class="mb-3">
-    <label for="gelombang" class="form-label">Gelombang Pendaftaran</label>
-    <select class="form-control" id="gelombang" name="gelombang" required>
-        <option value="">Pilih Gelombang Pendaftaran</option>
-        <option value="1" <?= isset($mahasiswa['gelombang']) && $mahasiswa['gelombang'] == '1' ? 'selected' : ''; ?>>Gelombang 1</option>
-        <option value="2" <?= isset($mahasiswa['gelombang']) && $mahasiswa['gelombang'] == '2' ? 'selected' : ''; ?>>Gelombang 2</option>
-        <option value="3" <?= isset($mahasiswa['gelombang']) && $mahasiswa['gelombang'] == '3' ? 'selected' : ''; ?>>Gelombang 3</option>
-    </select>
-</div>
-
-
-    <!-- Biaya Pendaftaran -->
-    <div class="mb-3">
-        <label for="biaya_pendaftaran" class="form-label">Biaya Pendaftaran</label>
-        <input type="text" class="form-control" id="biaya_pendaftaran" name="biaya_pendaftaran" 
-               value="<?= number_format($mahasiswa['biaya_pendaftaran'] ?? 0, 0, ',', '.'); ?>" readonly>
-    </div>
-
-   <!-- File Sebelumnya -->
-   <div class="mb-3">
-        <label for="file_sebelumnya" class="form-label">File Sebelumnya</label>
-        <?php if (!empty($berkas)): ?>
-            <a href="<?= $berkas['file_path']; ?>" target="_blank">Lihat File</a>
-        <?php else: ?>
-            <p>Belum ada file yang diunggah.</p>
-        <?php endif; ?>
-    </div>
-    <!-- Upload File Baru -->
-    <div class="mb-3">
-        <label for="file" class="form-label">Upload File Baru</label>
-        <input type="file" class="form-control" id="file" name="file" accept=".pdf">
-        <small class="form-text text-muted">Hanya file PDF dengan ukuran maksimum 3MB yang diizinkan.</small>
-    </div>
-    <!-- No Telepon -->
-    <div class="mb-3">
-    <label for="no_telp" class="form-label">No Telepon</label>
-    <div class="input-group">
-        <span class="input-group-text" id="basic-addon1">+62</span> <!-- Kode negara Indonesia -->
-        <input type="number" class="form-control" id="no_telp" name="no_telp" 
-               value="<?= $mahasiswa['no_telp'] ?? ''; ?>" required>
-    </div>
-</div>
-
-
-
-    <!-- Tombol Simpan -->
-    <button type="submit" class="btn btn-primary" id="submitButton">Update</button>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
-</form>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
-
+   
     <!-- Libs JS -->
     <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
     <script src="../../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>
@@ -714,56 +543,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="../../assets/js/demo.min.js?1692870487" defer></script>
 
     <script>
-    function updateBiaya() {
-    var programStudi = document.getElementById("program_studi").value;
-    var biayaPendaftaran = 0;
-    var biayaGedung = 0;
-    var biayaSPP = 0;
-
-    // Kondisi untuk setiap program studi
-    if (programStudi == 1) { //S1 Rekayasa Perangkat Lunak
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else if (programStudi == 2) { //S1 INFORMATIKA
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else if (programStudi == 3) { // S1 SISTEM INFORMASI
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else if (programStudi == 4) { //D3 KEBIDANAN
-        biayaPendaftaran = 2100000;
-        biayaGedung = 6000000;
-        biayaSPP = 1100000;
-    } else if (programStudi == 5) { // S1 KEWIRAUSAHAAN
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else if (programStudi == 6) { // S2 MANAJEMEN
-      biayaPendaftaran = 1100000;
-        biayaGedung = 7500000;
-        biayaSPP = 1250000;
-    } else if (programStudi == 7) { // S1  MANAJEMEN
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else { // Jika tidak ada jurusan yang dipilih
-        biayaPendaftaran = 0;
-        biayaGedung = 0;
-        biayaSPP = 0;
-    }
-
-    // Kalkulasi total biaya
-    var totalBiaya = biayaPendaftaran + biayaGedung + biayaSPP;
-    document.getElementById("biaya_pendaftaran").value = totalBiaya.toLocaleString();
-}
-
-
-
-
-
     document.getElementById('logoutLink').addEventListener('click', function (event) {
         event.preventDefault(); // Mencegah aksi default tautan
         Swal.fire({
@@ -781,42 +560,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
     });
-    document.addEventListener("DOMContentLoaded", function() {
-    // Ambil tombol submit form
-    const submitButton = document.querySelector("button[type='submit']");
 
-    // Event listener ketika tombol submit diklik
-    submitButton.addEventListener("click", function(event) {
-        event.preventDefault(); // Mencegah form agar tidak langsung disubmit
+    let lastSortedColumn = -1; // Variabel untuk melacak kolom yang terakhir diurutkan
+    let sortOrder = 'desc'; // Urutan default adalah descending (terbesar ke terkecil)
 
-        // Tampilkan pesan SweetAlert
-        Swal.fire({
-            title: 'Konfirmasi',
-            text: 'Apakah Anda yakin ingin mengirimkan data?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Kirim!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Jika pengguna mengklik 'Ya, Kirim!', form akan disubmit
-                Swal.fire('Data Terkirim!', 'Data Anda berhasil dikirim!', 'success').then(() => {
-                  // Redirect ke tampil_data.php setelah submit
-                 
-                    document.querySelector('form').submit(); 
-                    
-                    
-                });
-            } else {
-                // Jika pengguna mengklik 'Batal', tampilkan pesan batal
-                Swal.fire('Batal', 'Pengiriman data dibatalkan', 'error');
-            }
-        });
+    // Fungsi untuk menampilkan data dan menghilangkan skeleton
+    window.onload = function () {
+      const skeletonLoader = document.getElementById('skeleton-loader');
+      const table = document.getElementById('data-table');
+
+      // Sembunyikan skeleton dan tampilkan tabel
+      skeletonLoader.style.display = 'none';
+      table.style.display = 'table';
+    };
+
+    function sortTable(columnIndex) {
+      const table = document.getElementById("data-table");
+      const tbody = table.tBodies[0];
+      const rows = Array.from(tbody.rows);
+
+      // Cek apakah kolom yang sama yang diklik sebelumnya
+      if (lastSortedColumn === columnIndex) {
+        sortOrder = (sortOrder === 'desc') ? 'asc' : 'desc'; // Toggle urutan
+      } else {
+        sortOrder = 'desc'; // Jika kolom berbeda, defaultkan ke descending
+      }
+
+      // Mengurutkan berdasarkan kolom yang dipilih dari besar ke kecil atau kecil ke besar
+      rows.sort((a, b) => {
+        const aValue = a.cells[columnIndex].textContent.trim().toLowerCase();
+        const bValue = b.cells[columnIndex].textContent.trim().toLowerCase();
+
+        // Jika kolom angka, gunakan parseInt untuk konversi
+        if (!isNaN(aValue) && !isNaN(bValue)) {
+          return sortOrder === 'desc' 
+            ? parseInt(bValue, 10) - parseInt(aValue, 10) 
+            : parseInt(aValue, 10) - parseInt(bValue, 10);
+        }
+
+        // Jika kolom teks, gunakan string comparison
+        return sortOrder === 'desc' 
+          ? bValue.localeCompare(aValue) 
+          : aValue.localeCompare(bValue);
+      });
+
+      // Reorder rows dalam tabel
+      rows.forEach(row => tbody.appendChild(row));
+
+      // Melacak kolom yang terakhir diurutkan
+      lastSortedColumn = columnIndex;
+    }
+
+    // Fungsi untuk menyalin nomor rekening
+  function copyRekening(id) {
+    const rekening = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(rekening).then(() => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Nomor rekening berhasil disalin',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }).catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: 'Nomor rekening tidak dapat disalin',
+      });
     });
-});
+  }
+</script>
 
-
-   
-    </script>
-    </body>
-    </html>
+  </body>
+</html>

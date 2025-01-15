@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 include '../../koneksi.php'; // Koneksi ke database
 
@@ -26,6 +26,7 @@ if ($result['role'] !== 'admin') {
 $query = "SELECT m.nama_lengkap, 
                  d.status AS status_pendaftaran,
                  d.pendaftaran_id,
+                 d.keterangan,
                  m.mahasiswa_id
           FROM mahasiswa m
           LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id";
@@ -33,10 +34,11 @@ $stmt = $pdo->prepare($query);
 $stmt->execute();
 $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Proses form untuk memperbarui status pendaftaran
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran']) && isset($_POST['mahasiswa_id'])) {
+// Proses form untuk insert/update data pendaftaran
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'], $_POST['mahasiswa_id'], $_POST['keterangan'])) {
     $status_pendaftaran = $_POST['status_pendaftaran'];
     $mahasiswa_id = $_POST['mahasiswa_id'];
+    $keterangan = $_POST['keterangan'];
 
     // Query untuk memeriksa apakah mahasiswa_id sudah ada di tabel pendaftaran
     $checkQuery = "SELECT * FROM pendaftaran WHERE mahasiswa_id = ?";
@@ -45,15 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status_pendaftaran'])
     $pendaftaranData = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
     if ($pendaftaranData) {
-        // Update status jika data sudah ada
-        $updateQuery = "UPDATE pendaftaran SET status = ? WHERE mahasiswa_id = ?";
+        // Update status dan keterangan jika data sudah ada
+        $updateQuery = "UPDATE pendaftaran SET status = ?, keterangan = ? WHERE mahasiswa_id = ?";
         $updateStmt = $pdo->prepare($updateQuery);
-        $updateStmt->execute([$status_pendaftaran, $mahasiswa_id]);
+        $updateStmt->execute([$status_pendaftaran, $keterangan, $mahasiswa_id]);
     } else {
         // Insert data baru jika belum ada
-        $insertQuery = "INSERT INTO pendaftaran (mahasiswa_id, status) VALUES (?, ?)";
+        $insertQuery = "INSERT INTO pendaftaran (mahasiswa_id, status, keterangan) VALUES (?, ?, ?)";
         $insertStmt = $pdo->prepare($insertQuery);
-        $insertStmt->execute([$mahasiswa_id, $status_pendaftaran]);
+        $insertStmt->execute([$mahasiswa_id, $status_pendaftaran, $keterangan]);
     }
 
     // Redirect untuk mencegah resubmission
@@ -66,7 +68,7 @@ if (isset($_GET['mahasiswa_id'])) {
     $mahasiswa_id = $_GET['mahasiswa_id'];
 
     // Query untuk mengambil data mahasiswa berdasarkan mahasiswa_id
-    $query = "SELECT m.mahasiswa_id, m.nama_lengkap, d.status AS status_pendaftaran
+    $query = "SELECT m.mahasiswa_id, m.nama_lengkap, d.status AS status_pendaftaran, d.keterangan
               FROM mahasiswa m
               LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id
               WHERE m.mahasiswa_id = ?";
@@ -75,6 +77,7 @@ if (isset($_GET['mahasiswa_id'])) {
     $data_mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
+
 <!doctype html>
 <!--
 * Tabler - Premium and Open Source dashboard template with responsive and high quality UI.
@@ -184,6 +187,10 @@ if (isset($_GET['mahasiswa_id'])) {
       display: flex;
       flex-direction: column;
     }
+
+    #search-input::placeholder {
+    font-size: 0.8rem; /* Adjust this value as needed */
+  }
 
     </style>
   </head>
@@ -406,47 +413,64 @@ if (isset($_GET['mahasiswa_id'])) {
         </div>
         <!-- Page body -->
         <div class="page-body">
-  <div class="container-xl">
-  <!-- Skeleton Loading -->
-  <!-- Skeleton Loading -->
-
-<div id="skeleton-loader" class="skeleton-container">
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-</div>
-<!-- Table Data -->
-<!-- Table Data -->
-<div class="table-responsive">
-    <table id="data-table" class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Nomor</th>
-                <th>Nama Mahasiswa</th>
-                <th>Status Pendaftaran</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-                foreach ($data_mahasiswa as $index => $row) {
-                    echo "<tr>
-                            <td>" . ($index + 1) . "</td>
-                            <td>{$row['nama_lengkap']}</td>
-                            <td>{$row['status_pendaftaran']}</td>
-                            <td>
-                                <button class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#modal-report' 
-                                data-pendaftaran-id='{$row['pendaftaran_id']}' 
-                                data-mahasiswa-id='{$row['mahasiswa_id']}'
-                                data-status-pendaftaran='{$row['status_pendaftaran']}'>
-                                    Ubah Status
-                                </button>
-                            </td>
-                        </tr>";
-                }
-            ?>
-        </tbody>
-    </table>
+        <div class="container-xl">
+    <div class="d-flex justify-content-between mb-3">
+        <!-- Filter Jumlah Data -->
+        <div>
+            <label for="data-length" class="me-2">Tampilkan:</label>
+            <select id="data-length" class="form-select" style="width: auto; display: inline-block;">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+        <!-- Input Pencarian -->
+        <div>
+        <input type="text" id="search-input" class="form-control form-control-md w-100" placeholder="Cari Data Berdasarkan Nama...">
+        </div>
+    </div>
+    <!-- Skeleton Loading -->
+    <div id="skeleton-loader" class="skeleton-container">
+        <div class="skeleton skeleton-text skeleton-loading"></div>
+        <div class="skeleton skeleton-text skeleton-loading"></div>
+        <div class="skeleton skeleton-text skeleton-loading"></div>
+    </div>
+    <!-- Table Data -->
+    <div class="table-responsive">
+        <table id="data-table" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nomor</th>
+                    <th>Nama Mahasiswa</th>
+                    <th>Status Pendaftaran</th>
+                    <th>Catatan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+                <!-- Data diisi dengan PHP -->
+                <?php foreach ($data_mahasiswa as $index => $row): ?>
+                    <tr>
+                        <td><?= $index + 1; ?></td>
+                        <td><?= htmlspecialchars($row['nama_lengkap']); ?></td>
+                        <td><?= htmlspecialchars($row['status_pendaftaran'] ?? '-'); ?></td>
+                        <td><?= htmlspecialchars($row['keterangan'] ?? '-'); ?></td>
+                        <td>
+                            <button class="btn btn-primary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modal-report" 
+                                    data-pendaftaran-id="<?= htmlspecialchars($row['pendaftaran_id']); ?>" 
+                                    data-mahasiswa-id="<?= htmlspecialchars($row['mahasiswa_id']); ?>"
+                                    data-status-pendaftaran="<?= htmlspecialchars($row['status_pendaftaran']); ?>"
+                                    data-keterangan="<?= htmlspecialchars($row['keterangan'] ?? ''); ?>">
+                                Ubah Status
+                            </button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 
@@ -464,21 +488,28 @@ if (isset($_GET['mahasiswa_id'])) {
 
           <div class="mb-3">
             <label class="form-label">Nama Lengkap</label>
-            <!-- Set the nama_lengkap value dynamically from PHP -->
-            <input type="text" class="form-control" name="nama_lengkap" id="nama_lengkap" value="<?php echo htmlspecialchars($row['nama_lengkap']); ?>" readonly>
+            <input type="text" class="form-control" name="nama_lengkap" id="nama_lengkap" readonly>
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Status Pendaftaran</label>
-            <select class="form-select" name="status_pendaftaran" required>
-                <option value="menunggu disetujui">Menunggu Disetujui</option>
-                <option value="disetujui">Disetujui</option>
-                <option value="pending">Pending</option>
-            </select>
+        <label for="status_pendaftaran" class="form-label">Status Pendaftaran</label>
+        <select class="form-select" id="status_pendaftaran" name="status_pendaftaran" required>
+            <option value="Pilih Status Pendaftaran" selected>Pilih Status Pendaftaran</option>
+            <option value="menunggu disetujui">Menunggu Disetujui</option>
+            <option value="disetujui">Disetujui</option>
+            <option value="pending">Pending</option>
+            <option value="ditolak">Ditolak</option>
+        </select>
+    </div>
+
+
+          <div class="mb-3">
+            <label class="form-label">Catatan</label>
+            <textarea class="form-control" name="keterangan" id="keterangan" rows="4" placeholder="Masukkan catatan..."></textarea>
           </div>
 
           <div class="text-end">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Update</button>
           </div>
         </form>
@@ -486,6 +517,7 @@ if (isset($_GET['mahasiswa_id'])) {
     </div>
   </div>
 </div>
+
 
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
@@ -598,22 +630,22 @@ if (isset($_GET['mahasiswa_id'])) {
       lastSortedColumn = columnIndex;
     }
 
-   // Script to populate the modal fields dynamically
-document.addEventListener('DOMContentLoaded', function () {
-    var modal = new bootstrap.Modal(document.getElementById('modal-report'));
-    var pendaftaranId = document.querySelectorAll('button[data-bs-target="#modal-report"]');
-    
-    pendaftaranId.forEach(function(button) {
-        button.addEventListener('click', function() {
-            var mahasiswaId = this.getAttribute('data-mahasiswa-id');
-            var statusPendaftaran = this.getAttribute('data-status-pendaftaran');
+    document.querySelectorAll("[data-bs-toggle='modal']").forEach(button => {
+    button.addEventListener("click", function() {
+        // Ambil data dari atribut tombol
+        const mahasiswaId = this.getAttribute("data-mahasiswa-id");
+        const namaLengkap = this.closest("tr").querySelector("td:nth-child(2)").textContent.trim();
+        const statusPendaftaran = this.getAttribute("data-status-pendaftaran");
+        const keterangan = this.getAttribute("data-keterangan");
 
-            document.getElementById('mahasiswa_id').value = mahasiswaId;
-            document.getElementById('nama_lengkap').value = this.getAttribute('data-nama-lengkap');
-            document.querySelector('select[name="status_pendaftaran"]').value = statusPendaftaran;
-        });
+        // Isi data ke dalam form di modal
+        document.getElementById("mahasiswa_id").value = mahasiswaId;
+        document.getElementById("nama_lengkap").value = namaLengkap;
+        document.querySelector("select[name='status_pendaftaran']").value = statusPendaftaran || 'Pilih Status Pendaftaran';
+        document.getElementById("keterangan").value = keterangan || '';
     });
 });
+
 // Tangani klik tombol "Update"
 document.querySelector("button[type='submit']").addEventListener("click", function(event) {
     event.preventDefault(); // Mencegah form dikirimkan langsung
@@ -646,6 +678,38 @@ document.querySelector("button[type='submit']").addEventListener("click", functi
       }
     });
   });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tableBody = document.getElementById('data-table-body');
+    const searchInput = document.getElementById('search-input');
+    const dataLengthSelect = document.getElementById('data-length');
+
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    function filterData() {
+        const searchValue = searchInput.value.toLowerCase();
+        const maxRows = parseInt(dataLengthSelect.value, 10);
+
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const namaLengkap = row.children[1].textContent.toLowerCase();
+            const matchesSearch = namaLengkap.includes(searchValue);
+
+            if (matchesSearch && visibleCount < maxRows) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', filterData);
+    dataLengthSelect.addEventListener('change', filterData);
+
+    filterData(); // Inisialisasi filter
+});
+
 </script>
 
   </body>

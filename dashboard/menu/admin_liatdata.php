@@ -152,6 +152,10 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
       flex-direction: column;
     }
 
+    #search-input::placeholder {
+    font-size: 0.8rem; /* Adjust this value as needed */
+  }
+
     </style>
   </head>
   <body >
@@ -372,70 +376,90 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <!-- Page body -->
         <div class="page-body">
-  <div class="container-xl">
-  <div id="skeleton-loader" class="skeleton-container">
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
-    <div class="skeleton skeleton-text skeleton-loading"></div>
+        <div class="container-xl">
+    <div class="d-flex justify-content-between mb-3">
+        <!-- Filter Jumlah Data -->
+        <div>
+            <label for="data-length" class="me-2">Tampilkan:</label>
+            <select id="data-length" class="form-select" style="width: auto; display: inline-block;">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+        <!-- Input Pencarian -->
+        <div>
+        <input type="text" id="search-input" class="form-control form-control-md w-100" placeholder="Cari Data By:Nama,NIK,Tahun lulus">
+        </div>
+    </div>
+
+    <!-- Skeleton Loading -->
+    <div id="skeleton-loader" class="skeleton-container">
+        <div class="skeleton skeleton-text skeleton-loading"></div>
+        <div class="skeleton skeleton-text skeleton-loading"></div>
+        <div class="skeleton skeleton-text skeleton-loading"></div>
+    </div>
+
+    <!-- Tabel Data -->
+    <div class="table-responsive">
+        <table id="data-table" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nomor</th>
+                    <th>Nama Mahasiswa</th>
+                    <th>NIK</th>
+                    <th>Alamat</th>
+                    <th>Sekolah Asal</th>
+                    <th>Tahun Lulus</th>
+                    <th>Biaya Pendaftaran</th>
+                    <th>Program Studi Pilihan</th>
+                    <th>Kelas Pilihan</th>
+                    <th>Berkas Pendaftaran</th>
+                    <th>Status Pendaftaran</th>
+                    <th>Nilai Ujian</th>
+                    <th>Gelombang</th>
+                    <th>Tanggal Pendaftaran</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+                <?php
+                    foreach ($data_mahasiswa as $index => $row) {
+                        echo "<tr>
+                                <td>" . ($index + 1) . "</td>
+                                <td>{$row['nama_lengkap']}</td>
+                                <td>{$row['nik']}</td>
+                                <td>{$row['alamat']}</td>
+                                <td>{$row['sekolah_asal']}</td>
+                                <td>{$row['tahun_lulus']}</td>
+                                <td>Rp. " . number_format($row['biaya_pendaftaran'], 0, ',', '.') . "</td>
+                                <td>{$row['nama_program_studi']}</td>
+                                <td>{$row['nama_kelas']}</td>
+                                <td><a href='{$row['file_path']}' class='text-danger' target='_blank'>Lihat Berkas</a></td>
+                                <td>{$row['status_pendaftaran']}</td>
+                                <td>{$row['nilai_ujian']}</td>
+                                <td>{$row['gelombang']}</td>
+                                <td>{$row['waktu_pendaftaran']}</td>
+                                <td>
+                                    <a href='update_admin.php?id={$row['mahasiswa_id']}' class='btn btn-info btn-sm' title='Edit'>
+                                        <i class='fas fa-edit'></i>
+                                    </a>
+                                    <a href='cetak_pdf_admin.php?id={$row['mahasiswa_id']}' class='btn btn-success btn-sm' title='Cetak PDF'>
+                                        <i class='fas fa-file-pdf'></i>
+                                    </a>
+                                    <a href='delete_data_admin.php?id={$row['mahasiswa_id']}' class='btn btn-danger btn-sm btn-delete' title='Hapus' data-id='{$row['mahasiswa_id']}'>
+                                        <i class='fas fa-trash'></i>
+                                    </a>
+                                </td>
+                            </tr>";
+                    }
+                ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- Tabel Data -->
-<div class="table-responsive">
-    <table id="data-table" class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Nomor</th>
-                <th>Nama Mahasiswa</th>
-                <th>NIK</th>
-                <th>Alamat</th>
-                <th>Sekolah Asal</th>
-                <th>Tahun Lulus</th>
-                <th>Biaya Pendaftaran</th>
-                <th>Program Studi Pilihan</th>
-                <th>Kelas Pilihan</th>
-                <th>Berkas Pendaftaran</th>
-                <th>Status Pendaftaran</th>
-                <th>Nilai Ujian</th>
-                <th>Gelombang</th>
-                <th>Tanggal Pendaftaran</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-    <?php
-        foreach ($data_mahasiswa as $index => $row) {
-            echo "<tr>
-                    <td>" . ($index + 1) . "</td>
-                    <td>{$row['nama_lengkap']}</td>
-                    <td>{$row['nik']}</td>
-                    <td>{$row['alamat']}</td>
-                    <td>{$row['sekolah_asal']}</td>
-                    <td>{$row['tahun_lulus']}</td>
-                    <td>Rp. " . number_format($row['biaya_pendaftaran'], 0, ',', '.') . "</td>
-                    <td>{$row['nama_program_studi']}</td>
-                    <td>{$row['nama_kelas']}</td>
-                    <td><a href='{$row['file_path']}' class='text-danger' target='_blank'>Lihat Berkas</a></td>
-                    <td>{$row['status_pendaftaran']}</td>
-                    <td>{$row['nilai_ujian']}</td>
-                    <td>{$row['gelombang']}</td>
-                    <td>{$row['waktu_pendaftaran']}</td>
-                    <td>
-                        <a href='update_admin.php?id={$row['mahasiswa_id']}' class='btn btn-info btn-sm' title='Edit'>
-                            <i class='fas fa-edit'></i>
-                        </a>
-                        <a href='cetak_pdf_admin.php?id={$row['mahasiswa_id']}' class='btn btn-success btn-sm' title='Cetak PDF'>
-                            <i class='fas fa-file-pdf'></i>
-                        </a>
-                        <a href='delete_data_admin.php?id={$row['mahasiswa_id']}' class='btn btn-danger btn-sm btn-delete' title='Hapus' data-id='{$row['mahasiswa_id']}'>
-                            <i class='fas fa-trash'></i>
-                        </a>
-                    </td>
-                </tr>";
-        }
-    ?>
-</tbody>
-    </table>
-</div>
+  
 
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
@@ -691,6 +715,42 @@ document.querySelectorAll('.btn-delete').forEach(button => {
             });
         });
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+    const tableBody = document.getElementById('data-table-body');
+    const searchInput = document.getElementById('search-input');
+    const dataLengthSelect = document.getElementById('data-length');
+
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    function filterData() {
+        const searchValue = searchInput.value.toLowerCase();
+        const maxRows = parseInt(dataLengthSelect.value, 10);
+
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const namaLengkap = row.children[1].textContent.toLowerCase();
+            const nik = row.children[2].textContent.toLowerCase();
+            const tahunLulus = row.children[5].textContent.toLowerCase();
+            const sekolahAsal = row.children[4].textContent.toLowerCase();
+
+            const matchesSearch = namaLengkap.includes(searchValue) || nik.includes(searchValue) || tahunLulus.includes(searchValue) || sekolahAsal.includes(searchValue);
+
+            if (matchesSearch && visibleCount < maxRows) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', filterData);
+    dataLengthSelect.addEventListener('change', filterData);
+
+    filterData(); // Inisialisasi filter
+});
+
 </script>
 
   </body>

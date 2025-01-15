@@ -47,7 +47,7 @@ $_SESSION['csrf_token'] = $csrfToken;
                 </div>
                 
                 <div class="mb-3 text-center mt-3">
-                        <a href="index.php">Login</a> | <a href="reset_password.php">Lupa Password?</a>
+                        <a href="index.php">Login</a> | <a href="reset_password.php">Lupa Password?</a> | <a href="http://localhost/PMB-Projek/assets/brosur/Pengisian%20Formulir.pdfz">Liat Panduan Pendaftaran</a>
                     </div>
 
             </form>

@@ -332,6 +332,19 @@ try {
                   </a>
                 </li>
 
+                <li class="nav-item">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/penerimaan.php" >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M15 19l2 2l4 -4" /></svg>
+
+                </span>
+                    <span class="nav-link-title">
+                    Pengumuman Penerimaan
+                    </span>
+                  </a>
+                </li>
+
 
                 <li class="nav-item dropdown">
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -495,41 +508,41 @@ try {
           <td>1</td>
           <td>1</td>
           <td>Mempersiapkan Dokumen Yang Dibutuhkan</td>
-          <td>2024-12-16</td>
-          <td>2024-12-20</td>
-          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+          <td>2024-09-10</td>
+          <td>2024-09-14</td>
+          <td style="color:green">Selesai</td>
         </tr>
         <tr>
           <td>2</td>
           <td>1</td>
           <td>Upload Berkas Dan Isi Biodata</td>
-          <td>2024-12-23</td>
-          <td>2025-01-01</td>
+          <td>2024-09-15 </td>
+          <td>2024-09-21</td>
           <td style="color: green;">Selesai</td>
         </tr>
         <tr>
           <td>3</td>
           <td>1</td>
           <td>UJIAN CBT</td>
-          <td>2025-01-13</td>
-          <td>2025-02-24</td>
-          <td style="color: dark;">Belum Dimulai</td>
+          <td>2024-09-24</td>
+          <td>2024-10-09</td>
+          <td style="color: green;">Selesai</td>
         </tr>
         <tr>
           <td>4</td>
           <td>1</td>
           <td>Proses Seleksi Berkas</td>
-          <td>2025-02-05</td>
-          <td>2025-02-25</td>
-          <td style="color: dark;">Belum Dimulai</td>
+          <td>2024-10-10 </td>
+          <td>2024-10-19</td>
+          <td style="color:green;">Selesai</td>
         </tr>
         <tr>
           <td>5</td>
           <td>1</td>
           <td>Pengumuman Seleksi</td>
-          <td>2025-02-25</td>
-          <td>2025-03-01</td>
-          <td style="color: dark;">Belum Dimulai</td>
+          <td>2024-10-20</td>
+          <td>2024-10-21</td>
+          <td style="color:green;">Selesai</td>
         </tr>
 
         <!-- Data Gelombang 2 -->
@@ -537,41 +550,41 @@ try {
           <td>6</td>
           <td>2</td>
           <td>Mempersiapkan Dokumen Yang Dibutuhkan</td>
-          <td>2024-10-02</td>
-          <td>2024-10-06</td>
-          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+          <td>2024-11-30 </td>
+          <td>2024-12-04 </td>
+          <td style="color:green;">Selesai</td>
         </tr>
         <tr>
           <td>7</td>
           <td>2</td>
           <td>Upload Berkas Dan Isi Biodata</td>
-          <td>2024-10-07</td>
-          <td>2024-10-16</td>
-          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+          <td>2024-12-05</td>
+          <td>2024-12-11</td>
+          <td style="color:green;">Selesai</td>
         </tr>
         <tr>
           <td>8</td>
           <td>2</td>
           <td>UJIAN CBT</td>
-          <td>2024-10-18</td>
-          <td>2024-11-30</td>
+          <td>2024-12-14</td>
+          <td>2024-12-29 </td>
           <td style="color: green;">Selesai</td>
         </tr>
         <tr>
           <td>9</td>
           <td>2</td>
           <td>Proses Seleksi Berkas</td>
-          <td>2024-12-01</td>
-          <td>2024-12-15</td>
+          <td>2025-01-01</td>
+          <td>2025-01-10</td>
           <td style="color: green;">Selesai</td>
         </tr>
         <tr>
           <td>10</td>
           <td>2</td>
           <td>Pengumuman Seleksi</td>
-          <td>2024-12-16</td>
-          <td>2024-12-20</td>
-          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+          <td>2025-01-11</td>
+          <td>2025-01-12 </td>
+          <td style="color:green;">Selesai</td>
         </tr>
 
         <!-- Data Gelombang 3 -->
@@ -579,40 +592,40 @@ try {
           <td>11</td>
           <td>3</td>
           <td>Mempersiapkan Dokumen Yang Dibutuhkan</td>
-          <td>2025-01-02</td>
-          <td>2025-01-06</td>
-          <td style="color: rgba(217, 44, 28);">Kadaluarsa</td>
+          <td>2025-02-21</td>
+          <td>2025-02-25</td>
+          <td style="color:dark;">Belum Dimulai</td>
         </tr>
         <tr>
           <td>12</td>
           <td>3</td>
           <td>Upload Berkas Dan Isi Biodata</td>
-          <td>2025-01-07</td>
-          <td>2025-01-15</td>
-          <td style="color: green;">Selesai</td>
+          <td>2025-02-26</td>
+          <td>2025-03-04</td>
+          <td style="color: dark;">Belum Dimulai</td>
         </tr>
         <tr>
           <td>13</td>
           <td>3</td>
           <td>UJIAN CBT</td>
-          <td>2025-01-17</td>
-          <td>2025-02-15</td>
+          <td>2025-03-07</td>
+          <td>2025-03-22 </td>
           <td style="color: dark;">Belum Dimulai</td>
         </tr>
         <tr>
           <td>14</td>
           <td>3</td>
           <td>Proses Seleksi Berkas</td>
-          <td>2025-02-16</td>
-          <td>2025-02-28</td>
+          <td>2025-03-23</td>
+          <td>2025-04-01</td>
           <td style="color: dark;">Belum Dimulai</td>
         </tr>
         <tr>
           <td>15</td>
           <td>3</td>
           <td>Pengumuman Seleksi</td>
-          <td>2025-03-01</td>
-          <td>2025-03-05</td>
+          <td>2025-04-02</td>
+          <td>2025-04-03</td>
           <td style="color: dark;">Belum Dimulai</td>
         </tr>
       </tbody>

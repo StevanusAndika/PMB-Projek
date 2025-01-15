@@ -11,7 +11,6 @@ if (!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 
-
 // Query untuk mendapatkan role pengguna
 $query = "SELECT role FROM users WHERE user_id = ?";
 $stmt = $pdo->prepare($query);
@@ -20,7 +19,7 @@ $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Cek jika role bukan admin
 if ($result['role'] !== 'pendaftar') {
-    echo "<h1>Anda tidak memiliki akses ke menu admin</h1>";
+    echo "<h1>Anda tidak memiliki akses ke menu ini</h1>";
     exit;
 }
 
@@ -30,7 +29,8 @@ $query = "
         m.*, 
         ps.nama_program_studi AS program_studi, 
         k.nama_kelas AS kelas,
-        p.status AS status_pendaftaran 
+        p.status AS status_pendaftaran,
+        p.keterangan AS keterangan_pendaftaran
     FROM mahasiswa m
     LEFT JOIN program_studi ps ON m.program_studi_id = ps.program_studi_id
     LEFT JOIN kelas k ON m.kelas_id = k.kelas_id
@@ -70,22 +70,31 @@ $fields = [
     'NIK' => $data_mahasiswa['nik'],
     'Alamat' => $data_mahasiswa['alamat'],
     'Sekolah Asal' => $data_mahasiswa['sekolah_asal'] ?: 'Tidak ada',
-    'Tahun Lulus' => $data_mahasiswa['tahun_lulus'],
-    // Format biaya pendaftaran dengan prefix "Rp."
-'Biaya Pendaftaran' => 'Rp. ' . number_format($data_mahasiswa['biaya_pendaftaran'], 0, ',', '.'),
-
+    'Tahun Lulus' => $data_mahasiswa['tahun_lulus'] ?: 'Tidak ada',
+    'Biaya Pendaftaran' => 'Rp. ' . number_format($data_mahasiswa['biaya_pendaftaran'], 0, ',', '.'),
     'No. Telepon' => $data_mahasiswa['no_telp'] ?: 'Tidak ada',
     'Program Studi' => $data_mahasiswa['program_studi'] ?: 'Tidak ada',
     'Kelas' => $data_mahasiswa['kelas'] ?: 'Tidak ada',
     'Gelombang' => $data_mahasiswa['Gelombang'] ?: 'Tidak ada',
     'Nilai Ujian' => $data_mahasiswa['Nilai_ujian'],
     'Status Pendaftaran' => ucfirst($data_mahasiswa['status_pendaftaran']) ?: 'Tidak ada',
-    'Waktu Pendaftaran' => $data_mahasiswa['waktu_pendaftaran']
+    'Keterangan Pendaftaran' => $data_mahasiswa['keterangan_pendaftaran'] ?: 'Tidak ada',
+    'Waktu Pendaftaran' => $data_mahasiswa['waktu_pendaftaran'] ?: 'Tidak ada'
 ];
 
+// Lebar kolom
+$colWidthLabel = 70; // Lebar kolom label
+$colWidthValue = 120; // Lebar kolom nilai
+
 foreach ($fields as $label => $value) {
-    $pdf->Cell(50, 10, $label, 1); // Nama Field
-    $pdf->Cell(140, 10, $value, 1, 1); // Nilai Field
+    // Ubah tinggi baris agar sesuai dengan teks yang panjang
+    $lineHeight = 8; // Tinggi setiap baris
+    
+    // Tulis kolom label
+    $pdf->Cell($colWidthLabel, $lineHeight, $label, 1); 
+    
+    // Tulis kolom nilai dengan teks yang dibungkus otomatis
+    $pdf->MultiCell($colWidthValue, $lineHeight, $value, 1); 
 }
 
 // Output PDF

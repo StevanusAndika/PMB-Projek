@@ -29,11 +29,13 @@ if ($resultRole['role'] === 'admin') {
 $query = "
     SELECT 
         m.nama_lengkap, 
-        p.status AS status_pendaftaran
+        p.status AS status_pendaftaran,
+        p.keterangan
     FROM mahasiswa m
     JOIN pendaftaran p ON m.mahasiswa_id = p.mahasiswa_id
     WHERE m.user_id = :user_id
 ";
+
 
 $stmt = $pdo->prepare($query);
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
@@ -345,6 +347,19 @@ $data_mahasiswa = $stmt->fetchAll();
                   </a>
                 </li>
 
+                <li class="nav-item">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/penerimaan.php" >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M15 19l2 2l4 -4" /></svg>
+
+                </span>
+                    <span class="nav-link-title">
+                    Pengumuman Penerimaan
+                    </span>
+                  </a>
+                </li>
+
 
                 <li class="nav-item dropdown">
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -476,24 +491,28 @@ $data_mahasiswa = $stmt->fetchAll();
 
 <div class="table-responsive">
     <table id="data-table" class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Nomor</th>
-                <th>Nama Mahasiswa</th>
-                <th>Status Pendaftaran</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-                foreach ($data_mahasiswa as $index => $row) {
-                    echo "<tr>
-                            <td>" . ($index + 1) . "</td>
-                            <td>{$row['nama_lengkap']}</td>
-                            <td>{$row['status_pendaftaran']}</td>
-                          </tr>";
-                }
-            ?>
-        </tbody>
+    <thead>
+    <tr>
+        <th>Nomor</th>
+        <th>Nama Mahasiswa</th>
+        <th>Status Pendaftaran</th>
+        <th>Keterangan</th>
+    </tr>
+</thead>
+
+<tbody>
+    <?php
+        foreach ($data_mahasiswa as $index => $row) {
+            echo "<tr>
+                    <td>" . ($index + 1) . "</td>
+                    <td>{$row['nama_lengkap']}</td>
+                    <td>{$row['status_pendaftaran']}</td>
+                    <td>{$row['keterangan']}</td>
+                  </tr>";
+        }
+    ?>
+</tbody>
+
     </table>
 </div>
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 27 Des 2024 pada 13.47
+-- Waktu pembuatan: 15 Jan 2025 pada 07.25
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -40,7 +40,8 @@ CREATE TABLE `berkas` (
 --
 
 INSERT INTO `berkas` (`berkas_id`, `mahasiswa_id`, `jenis_berkas`, `file_path`, `upload_time`) VALUES
-(54, 86, 'PDF', '../../uploads/file_676ea022018887.44007306.pdf', '2024-12-27 12:40:02');
+(117, 144, 'Ijazah/Transkrip Nilai', '../../uploads/file_67865a0db000f8.49005612.pdf', '2025-01-14 12:35:25'),
+(118, 147, 'Ijazah/Transkrip Nilai', '../../uploads/file_678753afe719e5.35441031.pdf', '2025-01-15 06:20:31');
 
 -- --------------------------------------------------------
 
@@ -81,16 +82,19 @@ CREATE TABLE `mahasiswa` (
   `program_studi_id` int(11) NOT NULL,
   `kelas_id` int(11) NOT NULL,
   `Nilai_ujian` int(50) NOT NULL,
-  `waktu_pendaftaran` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `waktu_pendaftaran` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `Gelombang` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data untuk tabel `mahasiswa`
 --
 
-INSERT INTO `mahasiswa` (`mahasiswa_id`, `user_id`, `nama_lengkap`, `nik`, `alamat`, `sekolah_asal`, `tahun_lulus`, `biaya_pendaftaran`, `no_telp`, `program_studi_id`, `kelas_id`, `Nilai_ujian`, `waktu_pendaftaran`) VALUES
-(85, 31, 'STEVANUS ANDIKA GALIH SETIAWAN', '39939010333', 'JL SEPAKAT 4 NO.57 RT03 RW001', 'SMK BINA NUSA  MANDIRI', '2023', 1500000, '089604134028', 1, 2, 0, '2024-12-27 03:15:29'),
-(86, 30, 'Steven', '482919393', 'JL 132939', 'SMK HUSNI THAMRIN', '2023', 1500000, '3839940', 1, 2, 99, '2024-12-27 12:40:42');
+INSERT INTO `mahasiswa` (`mahasiswa_id`, `user_id`, `nama_lengkap`, `nik`, `alamat`, `sekolah_asal`, `tahun_lulus`, `biaya_pendaftaran`, `no_telp`, `program_studi_id`, `kelas_id`, `Nilai_ujian`, `waktu_pendaftaran`, `Gelombang`) VALUES
+(144, 35, 'ARGI VAN MAULANA', '31239399128', 'JL CIANJUR NO.18', 'SMK husni thamrin', '2023', 9850000, '959595', 1, 2, 67, '2025-01-14 12:46:29', '1'),
+(145, 36, 'Nur Khalida Farhatie', '317629199', 'Jalan By Pass Ngurah Rai No.71,Bali', 'SMAN 77 BOGOR', '2020', 7500000, '192939', 1, 2, 90, '2025-01-15 05:38:08', '2'),
+(146, 37, 'Mirza', '317299', 'JALAN 810', 'SMAN 1 CIKARANG', '2019', 7500000, '087129399', 7, 2, 0, '2025-01-15 05:43:53', '2'),
+(147, 30, 'STEVANUS ANDIKA GALIH SETIAWAN', '5858585844444444', 'JL SEPAKAT 4 NO.57 RT003 RW001,CILANGKAP,JAKARTA TIMUR', 'SMK BINA NUSA MANDIRI', '2023', 7500000, '959595', 1, 2, 0, '2025-01-15 06:21:23', '1');
 
 -- --------------------------------------------------------
 
@@ -101,15 +105,19 @@ INSERT INTO `mahasiswa` (`mahasiswa_id`, `user_id`, `nama_lengkap`, `nik`, `alam
 CREATE TABLE `pendaftaran` (
   `pendaftaran_id` int(11) NOT NULL,
   `mahasiswa_id` int(11) NOT NULL,
-  `status` enum('menunggu disetujui','disetujui') NOT NULL
+  `status` enum('menunggu disetujui','disetujui','pending','ditolak') NOT NULL,
+  `keterangan` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data untuk tabel `pendaftaran`
 --
 
-INSERT INTO `pendaftaran` (`pendaftaran_id`, `mahasiswa_id`, `status`) VALUES
-(29, 86, 'menunggu disetujui');
+INSERT INTO `pendaftaran` (`pendaftaran_id`, `mahasiswa_id`, `status`, `keterangan`) VALUES
+(85, 144, 'pending', 'DATA/BERKAS ANDA BELUM LENGKAP'),
+(86, 145, 'menunggu disetujui', 'Menunggu Dikonfirmasi By Admin'),
+(87, 146, 'ditolak', 'TIDAK MELUNASI BIAYA'),
+(88, 147, 'disetujui', 'DATA ANDA TELAH LENGKAP');
 
 -- --------------------------------------------------------
 
@@ -147,7 +155,7 @@ CREATE TABLE `tanggal_pendaftaran` (
   `Nama_Kegiatan` varchar(50) NOT NULL,
   `tanggaL_berakhir` date NOT NULL,
   `tanggal_daftar` date NOT NULL,
-  `keterangan` enum('Belum Dimulai','Berlangsung','Selesai','Kadaluarsa') NOT NULL
+  `keterangan` enum('Belum Dimulai','Berlangsung','Selesai') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -155,7 +163,7 @@ CREATE TABLE `tanggal_pendaftaran` (
 --
 
 INSERT INTO `tanggal_pendaftaran` (`id_tanggal_daftar`, `Nama_Kegiatan`, `tanggaL_berakhir`, `tanggal_daftar`, `keterangan`) VALUES
-(2, 'Mempersiapkan Dokumen Yang Dibutuhkan', '2024-12-20', '2024-12-16', 'Kadaluarsa'),
+(2, 'Mempersiapkan Dokumen Yang Dibutuhkan', '2024-12-20', '2024-12-16', ''),
 (3, 'Upload Berkas Dan Isi Biodata', '2025-01-01', '2024-12-23', 'Selesai'),
 (4, 'UJIAN CBT', '2025-02-24', '2025-01-13', 'Belum Dimulai'),
 (5, 'Proses Seleksi Berkas ', '2025-02-25', '2025-02-05', 'Belum Dimulai'),
@@ -182,8 +190,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `created_at`, `jwt_token`) VALUES
-(30, 'Stevanus Andika Galih Setiawan', 'stevcomp58@gmail.com', '$2y$10$S9SCdFxxr12Z2BHHPZVfp.YVcEdEkniXsparyQZxpu.ZCQuuQePI2', 'pendaftar', '2024-12-23 13:37:57', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQ5NjEwNzcsImV4cCI6MTczNDk2MTM3NywiZW1haWwiOiJzdGV2Y29tcDU4QGdtYWlsLmNvbSJ9.C7qEC7LklxNP0qDNqXJ6g4r3JZYEYydWsrdTTbPREmU'),
-(31, 'Admin', 'admin@example.com', '$2y$10$uvEkx1BjtTy9ZAu0a/C15OoDtr3hrePA3aPBRDU3lzBpulN/5LxG6', 'admin', '2024-12-23 14:48:27', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQ5NjUzMDcsImV4cCI6MTczNDk2NTYwNywiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.CJCH3nznCR2oxXlVtJFoUrovoB-HZIXu85O3cvXMyKM');
+(30, 'Steven', 'user@example.com', '$2y$10$S9SCdFxxr12Z2BHHPZVfp.YVcEdEkniXsparyQZxpu.ZCQuuQePI2', 'pendaftar', '2024-12-23 13:37:57', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQ5NjEwNzcsImV4cCI6MTczNDk2MTM3NywiZW1haWwiOiJzdGV2Y29tcDU4QGdtYWlsLmNvbSJ9.C7qEC7LklxNP0qDNqXJ6g4r3JZYEYydWsrdTTbPREmU'),
+(31, 'Admin', 'admin@example.com', '$2y$10$ahoiGKaxVKdlYVBo.t7XRucbltoYVhqUhEZVbFdZLQjICA8EBQvHi', 'admin', '2024-12-23 14:48:27', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzQ5NjUzMDcsImV4cCI6MTczNDk2NTYwNywiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.CJCH3nznCR2oxXlVtJFoUrovoB-HZIXu85O3cvXMyKM'),
+(35, 'Argi', 'argi@mail.com', '$2y$10$zuW7O8JcRWbgjL.J0N03kOVwwcSkkm48PTEVeJCBIIORKkcL2QNcy', 'pendaftar', '2025-01-14 12:32:57', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzY4NTc5NzcsImV4cCI6MTczNjg1ODI3NywiZW1haWwiOiJhcmdpQG1haWwuY29tIn0.9N-ZFPGPCyX4Yr_0JnRc4So_3wFQjFBI22iuIgOf6Vo'),
+(36, 'Nur Khalida Farhatie', 'Nur01@gmail.com', '$2y$10$RMm30rvm0tjxRp5ECDQ8ru0cLgKbVJAdnW4GvxLdI65/ddayZwv4i', 'pendaftar', '2025-01-15 05:19:48', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzY5MTgzODgsImV4cCI6MTczNjkxODY4OCwiZW1haWwiOiJOdXIwMUBnbWFpbC5jb20ifQ.ZVek_SG1-uKv_ex9qLwhWyMR1JhB5y9AZxqCkWjCvvo'),
+(37, 'Mirza', 'mirza@mail.com', '$2y$10$atsayX8iuu2nNkbHhBh9Au9Mx5RJcVBOQUVYYssE43Uk5c2bfmzcC', 'pendaftar', '2025-01-15 05:41:02', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzY5MTk2NjIsImV4cCI6MTczNjkxOTk2MiwiZW1haWwiOiJtaXJ6YUBtYWlsLmNvbSJ9.kVakecmVfnY4XH4tkBSnwDUqSTTiq7oFlnXOKYToFB4');
 
 --
 -- Indexes for dumped tables
@@ -246,7 +257,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `berkas`
 --
 ALTER TABLE `berkas`
-  MODIFY `berkas_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `berkas_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT untuk tabel `kelas`
@@ -258,13 +269,13 @@ ALTER TABLE `kelas`
 -- AUTO_INCREMENT untuk tabel `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `mahasiswa_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
+  MODIFY `mahasiswa_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=148;
 
 --
 -- AUTO_INCREMENT untuk tabel `pendaftaran`
 --
 ALTER TABLE `pendaftaran`
-  MODIFY `pendaftaran_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `pendaftaran_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- AUTO_INCREMENT untuk tabel `program_studi`
@@ -282,7 +293,7 @@ ALTER TABLE `tanggal_pendaftaran`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

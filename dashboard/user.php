@@ -257,6 +257,20 @@ if (!$data) {
                   </a>
                 </li>
 
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/penerimaan.php" >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M15 19l2 2l4 -4" /></svg>
+
+                </span>
+                    <span class="nav-link-title">
+                    Pengumuman Penerimaan
+                    </span>
+                  </a>
+                </li>
+
                 <li class="nav-item dropdown">
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -375,79 +389,92 @@ if (!$data) {
        <!-- Page body -->
 <div class="page-body">
   <div class="container-xl">
-    <div class="row row-deck row-cards">
-      <!-- Card 1 -->
-      <div class="col-sm-12 col-lg-6 mb-3">
-        <a href="http://localhost/PMB-Projek/dashboard/menu/status_pendaftaran_user.php" class="card text-decoration-none">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Status Pendaftaran</div>
-              <div class="ms-auto">
-                <i class="fas fa-check-circle text-primary"></i>
-              </div>
-            </div>
+  <div class="row row-deck row-cards">
+  <!-- Card 1 -->
+  <div class="col-sm-12 col-lg-6 mb-3">
+    <a href="http://localhost/PMB-Projek/dashboard/assets/img/Cara%20pendaftaran.png" class="card text-decoration-none">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Cara Pendaftaran</div>
+          <div class="ms-auto">
+            <i class="fas fa-info-circle text-warning"></i>
           </div>
-        </a>
+        </div>
       </div>
+    </a>
+  </div>
 
-      <!-- Card 2 -->
-      <div class="col-sm-12 col-lg-6 mb-3">
-        <a href="http://localhost/PMB-Projek/dashboard/menu/tanggal_daftar.php" class="card text-decoration-none">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Jadwal Pendaftaran</div>
-              <div class="ms-auto">
-                <i class="fas fa-calendar-alt text-success"></i>
-              </div>
-            </div>
+  <!-- Card 2 -->
+  <div class="col-sm-12 col-lg-6 mb-3">
+    <a href="http://localhost/PMB-Projek/dashboard/menu/tanggal_daftar.php" class="card text-decoration-none">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Jadwal Pendaftaran</div>
+          <div class="ms-auto">
+            <i class="fas fa-calendar-alt text-success"></i>
           </div>
-        </a>
+        </div>
       </div>
+    </a>
+  </div>
 
-      <!-- Card 3 -->
-      <div class="col-sm-12 col-lg-6 mb-3">
-        <a href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" class="card text-decoration-none">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Program Studi</div>
-              <div class="ms-auto">
-                <i class="fas fa-graduation-cap text-info"></i>
-              </div>
-            </div>
+  <!-- Card 3 -->
+  <div class="col-sm-12 col-lg-6 mb-3">
+    <a href="http://localhost/PMB-Projek/dashboard/menu/program_studi.php" class="card text-decoration-none">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Program Studi</div>
+          <div class="ms-auto">
+            <i class="fas fa-graduation-cap text-info"></i>
           </div>
-        </a>
+        </div>
       </div>
+    </a>
+  </div>
 
-      <!-- Card 4 -->
-      <div class="col-sm-12 col-lg-6 mb-3">
-        <a href="./menu/isi_biodata.php" class="card text-decoration-none">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Isi Biodata</div>
-              <div class="ms-auto">
-                <i class="fas fa-list text-danger"></i>
-              </div>
-            </div>
+  <!-- Card 4 -->
+  <div class="col-sm-12 col-lg-6 mb-3">
+    <a href="./menu/isi_biodata.php" class="card text-decoration-none">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Isi Biodata</div>
+          <div class="ms-auto">
+            <i class="fas fa-list text-danger"></i>
           </div>
-        </a>
+        </div>
       </div>
+    </a>
+  </div>
 
-      <!-- Card 5 -->
-      <div class="col-sm-12 col-lg-6 mb-3">
-        <a href="http://localhost/PMB-Projek/dashboard/assets/img/Cara%20pendaftaran.png" class="card text-decoration-none">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Cara Pendaftaran</div>
-              <div class="ms-auto">
-                <i class="fas fa-info-circle text-warning"></i>
-              </div>
-            </div>
+  <!-- Card 5 -->
+  <div class="col-sm-12 col-lg-6 mb-3">
+    <a href="http://localhost/PMB-Projek/dashboard/menu/status_pendaftaran_user.php" class="card text-decoration-none">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Status Pendaftaran</div>
+          <div class="ms-auto">
+            <i class="fas fa-check-circle text-primary"></i>
           </div>
-        </a>
+        </div>
       </div>
-    </div>
+    </a>
+  </div>
+
+  <!-- Card 6 - Profile -->
+  <div class="col-sm-12 col-lg-6 mb-3">
+    <a href="http://localhost/PMB-Projek/dashboard/menu/penerimaan.php" class="card text-decoration-none">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Pengumuman Penerimaan</div>
+          <div class="ms-auto">
+          <i class="fa-solid fa-bullhorn"></i>
+          </div>
+        </div>
+      </div>
+    </a>
   </div>
 </div>
+
 
 
 
@@ -484,7 +511,7 @@ if (!$data) {
         </footer>
       </div>
     </div>
-    user
+    
     <!-- Libs JS -->
     <script src="../assets/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script>
     <script src="../assets/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script>

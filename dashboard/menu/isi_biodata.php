@@ -45,34 +45,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $biaya_pendaftaran = 0;
         $biaya_gedung = 0;
         $biaya_spp = 0;
-        if ($program_studi_id == 1) {
-            $biaya_pendaftaran = 1100000;
-            $biaya_gedung = 7500000;
-            $biaya_spp = 1250000;
-        } elseif ($program_studi_id == 2) {
-            $biaya_pendaftaran = 600000;
-            $biaya_gedung = 6000000;
-            $biaya_spp = 900000;
-        } elseif ($program_studi_id == 3) {
+        if ($program_studi_id == 1) { //S1 Rekayasa Perangkat Lunak
           $biayaPendaftaran = 600000;
-          $biayaGedung = 6000000;
-          $biayaSPP = 900000;
-        }else if($program_studi_id == 4){
-          $biayaPendaftaran = 600000;
-          $biayaGedung = 6000000;
-          $biayaSPP = 900000;
-        }else if($program_studi_id == 5){
-          $biayaPendaftaran = 600000;
-          $biayaGedung = 6000000;
-          $biayaSPP = 900000;
-        }else if($program_studi_id == 6){
-         $biayaPendaftaran = 600000;
-        $biayaGedung = 6000000;
+         $biayaGedung = 6000000;
         $biayaSPP = 900000;
-        }else if($program_studi_id==7){
+        } elseif ($program_studi_id == 2) {//S1 INFORMATIKA
+          $biayaPendaftaran = 600000;
+          $biayaGedung = 6000000;
+          $biayaSPP = 900000;
+        } elseif ($program_studi_id == 3) {// S1 SISTEM INFORMASI
+          $biayaPendaftaran = 600000;
+          $biayaGedung = 6000000;
+          $biayaSPP = 900000;
+        }else if($program_studi_id == 4){ //D3 Kebidanan
           $biayaPendaftaran = 2100000;
           $biayaGedung = 6000000;
           $biayaSPP = 1100000;
+        }else if($program_studi_id == 5){//S1 Kewirausahaan
+          $biayaPendaftaran = 600000;
+          $biayaGedung = 6000000;
+          $biayaSPP = 900000;
+        }else if($program_studi_id == 6){ // S2 MANAJEMEN
+          $biayaPendaftaran = 1100000;
+          $biayaGedung = 7500000;
+          $biayaSPP = 1250000;
+        }else if($program_studi_id==7){ //S1 Manajemen
+          $biayaPendaftaran = 600000;
+        $biayaGedung = 6000000;
+        $biayaSPP = 900000;
         }else{
           $biayaPendaftaran = 0;
           $biayaGedung = 0;
@@ -457,6 +457,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   </a>
                 </li>
 
+                <li class="nav-item">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/penerimaan.php" >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M15 19l2 2l4 -4" /></svg>
+
+                </span>
+                    <span class="nav-link-title">
+                    Pengumuman Penerimaan
+                    </span>
+                  </a>
+                </li>
+
 
                 <li class="nav-item dropdown">
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -468,7 +481,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <path d="M9 15l2 2l4 -4"/>
       </svg>
     </span>
-    <span class="nav-link-title">
+    <span class="nav-link-title active">
       Biodata
     </span>
   </a>
@@ -826,34 +839,34 @@ function updateBiaya() {
     var biayaSPP = 0;
 
     // Kondisi untuk setiap program studi
-    if (programStudi == 1) { // S2 Manajemen
-        biayaPendaftaran = 1100000;
-        biayaGedung = 7500000;
-        biayaSPP = 1250000;
-    } else if (programStudi == 2) { // S1 Manajemen
+    if (programStudi == 1) { //S1 Rekayasa Perangkat Lunak
         biayaPendaftaran = 600000;
         biayaGedung = 6000000;
         biayaSPP = 900000;
-    } else if (programStudi == 3) { // S1 Kewirausahaan
+    } else if (programStudi == 2) { //S1 INFORMATIKA
         biayaPendaftaran = 600000;
         biayaGedung = 6000000;
         biayaSPP = 900000;
-    } else if (programStudi == 4) { // S1 Kewirausahaan
+    } else if (programStudi == 3) { // S1 SISTEM INFORMASI
         biayaPendaftaran = 600000;
         biayaGedung = 6000000;
         biayaSPP = 900000;
-    } else if (programStudi == 5) { // S1 Informatika
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else if (programStudi == 6) { // S1 Sistem Informasi
-        biayaPendaftaran = 600000;
-        biayaGedung = 6000000;
-        biayaSPP = 900000;
-    } else if (programStudi == 7) { // D3 Kebidanan
+    } else if (programStudi == 4) { //D3 KEBIDANAN
         biayaPendaftaran = 2100000;
         biayaGedung = 6000000;
         biayaSPP = 1100000;
+    } else if (programStudi == 5) { // S1 KEWIRAUSAHAAN
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
+    } else if (programStudi == 6) { // S2 MANAJEMEN
+      biayaPendaftaran = 1100000;
+        biayaGedung = 7500000;
+        biayaSPP = 1250000;
+    } else if (programStudi == 7) { // S1  MANAJEMEN
+        biayaPendaftaran = 600000;
+        biayaGedung = 6000000;
+        biayaSPP = 900000;
     } else { // Jika tidak ada jurusan yang dipilih
         biayaPendaftaran = 0;
         biayaGedung = 0;

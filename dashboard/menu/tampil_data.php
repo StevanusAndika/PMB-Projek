@@ -28,13 +28,15 @@ $query = "SELECT m.*,
                  b.file_path, 
                  p.nama_program_studi, 
                  k.nama_kelas, 
-                 d.status AS status_pendaftaran
+                 d.status AS status_pendaftaran, 
+                 d.keterangan 
           FROM mahasiswa m
           LEFT JOIN berkas b ON m.mahasiswa_id = b.mahasiswa_id
           LEFT JOIN program_studi p ON m.program_studi_id = p.program_studi_id
           LEFT JOIN kelas k ON m.kelas_id = k.kelas_id
           LEFT JOIN pendaftaran d ON m.mahasiswa_id = d.mahasiswa_id
           WHERE m.user_id = ?";
+
 $stmt = $pdo->prepare($query);
 $stmt->execute([$user['user_id']]);
 $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -343,6 +345,19 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   </a>
                 </li>
 
+                <li class="nav-item">
+                  <a class="nav-link" href="http://localhost/PMB-Projek/dashboard/menu/penerimaan.php" >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M15 19l2 2l4 -4" /></svg>
+
+                </span>
+                    <span class="nav-link-title">
+                    Pengumuman Penerimaan
+                    </span>
+                  </a>
+                </li>
+
                 <li class="nav-item dropdown">
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -463,7 +478,7 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <!-- Skeleton Loading -->
   <!-- Skeleton Loading -->
 
-<div id="skeleton-loader" class="skeleton-container">
+  <div id="skeleton-loader" class="skeleton-container">
     <div class="skeleton skeleton-text skeleton-loading"></div>
     <div class="skeleton skeleton-text skeleton-loading"></div>
     <div class="skeleton skeleton-text skeleton-loading"></div>
@@ -484,6 +499,7 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Kelas Pilihan</th>
                 <th>Berkas Pendaftaran</th>
                 <th>Status Pendaftaran</th>
+                <th>Keterangan</th>
                 <th>Tanggal Pendaftaran</th>
                 <th>Aksi</th>
             </tr>
@@ -504,15 +520,19 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <a href="<?= htmlspecialchars($row['file_path']); ?>" class="text-danger" target="_blank">Lihat Berkas</a>
                     </td>
                     <td><?= htmlspecialchars($row['status_pendaftaran']); ?></td>
+                    <td><?= htmlspecialchars($row['keterangan']); ?></td>
                     <td><?= htmlspecialchars($row['waktu_pendaftaran']); ?></td>
                     <td>
                         <?php if ($row['status_pendaftaran'] === 'disetujui'): ?>
                             <button class="btn btn-secondary btn-sm" title="Tidak Bisa Diedit" disabled>
                                 <i class="fas fa-edit"></i>
                             </button>
+                            <button class="btn btn-secondary btn-sm" title="Tidak Bisa Dihapus" disabled>
+                                <i class="fas fa-trash"></i>
+                            </button>
                             <div class="mt-2">
                                 <small class="text-danger">
-                                    Silahkan hubungi admin untuk melakukan pergantian data.
+                                    Silahkan hubungi admin untuk melakukan perubahan data.
                                 </small>
                                 <a href="https://api.whatsapp.com/send/?phone=087788789741&text=Saya+tanya+terkait+pendaftaran&type=phone_number&app_absent=0" 
                                    class="btn btn-success btn-sm mt-1" 
@@ -523,8 +543,8 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <script>
                                 Swal.fire({
                                     icon: 'info',
-                                    title: 'Tidak Bisa Mengedit Data',
-                                    text: 'Anda sudah tidak bisa mengedit data, karena data sudah disetujui oleh admin.',
+                                    title: 'Aksi Dibatasi',
+                                    text: 'Anda tidak dapat menghapus atau mengedit data karena sudah disetujui oleh admin.',
                                     showConfirmButton: false,
                                     timer: 3000
                                 });
@@ -533,20 +553,19 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <a href="update_data.php" class="btn btn-info btn-sm" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            <a href="cetak_pdf.php?id=<?= $row['mahasiswa_id']; ?>" class="btn btn-success btn-sm" title="Cetak PDF">
+                                <i class="fas fa-file-pdf"></i>
+                            </a>
+                            <button class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $row['mahasiswa_id']; ?>)" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         <?php endif; ?>
-                        <a href="cetak_pdf.php?id=<?= $row['mahasiswa_id']; ?>" class="btn btn-success btn-sm" title="Cetak PDF">
-                            <i class="fas fa-file-pdf"></i>
-                        </a>
-                        <button class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $row['mahasiswa_id']; ?>)" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 </div>
-
 
 
         <footer class="footer footer-transparent d-print-none">
@@ -784,21 +803,22 @@ $data_mahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     function confirmDelete(mahasiswaId) {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data ini akan dihapus permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect to the delete URL with mahasiswa_id
-                window.location.href = 'delete_data.php?id=' + mahasiswaId;
-            }
-        });
-    }
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: "Apakah Anda yakin ingin menghapus data ini?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to delete action
+            window.location.href = `delete_data.php?id=${mahasiswaId}`;
+        }
+    });
+}
 </script>
 
   </body>
